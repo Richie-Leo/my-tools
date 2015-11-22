@@ -52,6 +52,10 @@ namespace Pandora.Invest
 		private System.Windows.Forms.Button btnFilterStock;
 		private System.Windows.Forms.Button btnImpStockExtInfo;
 		private System.Windows.Forms.Label lblProgressTitle;
+		private System.Windows.Forms.TextBox txtStockCode;
+		private System.Windows.Forms.TextBox txtEndDate;
+		private System.Windows.Forms.TextBox txtStartDate;
+		private System.Windows.Forms.Button btnGenChartKTrend;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -114,6 +118,10 @@ namespace Pandora.Invest
 			this.lblProgressInfo = new System.Windows.Forms.Label();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.lblProgressRate = new System.Windows.Forms.Label();
+			this.txtStockCode = new System.Windows.Forms.TextBox();
+			this.txtStartDate = new System.Windows.Forms.TextBox();
+			this.txtEndDate = new System.Windows.Forms.TextBox();
+			this.btnGenChartKTrend = new System.Windows.Forms.Button();
 			this.tabMainWindow.SuspendLayout();
 			this.tabMain.SuspendLayout();
 			this.tabDataCapture.SuspendLayout();
@@ -186,6 +194,10 @@ namespace Pandora.Invest
 			// tabDataCapture
 			// 
 			this.tabDataCapture.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.tabDataCapture.Controls.Add(this.btnGenChartKTrend);
+			this.tabDataCapture.Controls.Add(this.txtEndDate);
+			this.tabDataCapture.Controls.Add(this.txtStartDate);
+			this.tabDataCapture.Controls.Add(this.txtStockCode);
 			this.tabDataCapture.Controls.Add(this.btnImpStockExtInfo);
 			this.tabDataCapture.Controls.Add(this.btnFilterStock);
 			this.tabDataCapture.Controls.Add(this.btnImpPlate);
@@ -209,17 +221,17 @@ namespace Pandora.Invest
 			this.tabDataCapture.Controls.Add(this.btnSelTradeListDir);
 			this.tabDataCapture.Controls.Add(this.btnSelKLineDir);
 			this.tabDataCapture.Controls.Add(this.lblKLineDir);
-			this.tabDataCapture.Location = new System.Drawing.Point(4, 23);
+			this.tabDataCapture.Location = new System.Drawing.Point(4, 27);
 			this.tabDataCapture.Margin = new System.Windows.Forms.Padding(0);
 			this.tabDataCapture.Name = "tabDataCapture";
-			this.tabDataCapture.Size = new System.Drawing.Size(857, 444);
+			this.tabDataCapture.Size = new System.Drawing.Size(857, 440);
 			this.tabDataCapture.TabIndex = 2;
 			this.tabDataCapture.Text = "数据抓取";
 			this.tabDataCapture.UseVisualStyleBackColor = true;
 			// 
 			// btnImpStockExtInfo
 			// 
-			this.btnImpStockExtInfo.Location = new System.Drawing.Point(115, 117);
+			this.btnImpStockExtInfo.Location = new System.Drawing.Point(138, 69);
 			this.btnImpStockExtInfo.Name = "btnImpStockExtInfo";
 			this.btnImpStockExtInfo.Size = new System.Drawing.Size(91, 23);
 			this.btnImpStockExtInfo.TabIndex = 38;
@@ -229,7 +241,7 @@ namespace Pandora.Invest
 			// 
 			// btnFilterStock
 			// 
-			this.btnFilterStock.Location = new System.Drawing.Point(21, 117);
+			this.btnFilterStock.Location = new System.Drawing.Point(36, 69);
 			this.btnFilterStock.Name = "btnFilterStock";
 			this.btnFilterStock.Size = new System.Drawing.Size(75, 23);
 			this.btnFilterStock.TabIndex = 37;
@@ -516,6 +528,37 @@ namespace Pandora.Invest
 			this.lblProgressRate.TabIndex = 39;
 			this.lblProgressRate.Text = "0%";
 			this.lblProgressRate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// txtStockCode
+			// 
+			this.txtStockCode.Location = new System.Drawing.Point(36, 139);
+			this.txtStockCode.Name = "txtStockCode";
+			this.txtStockCode.Size = new System.Drawing.Size(100, 23);
+			this.txtStockCode.TabIndex = 39;
+			// 
+			// txtStartDate
+			// 
+			this.txtStartDate.Location = new System.Drawing.Point(143, 140);
+			this.txtStartDate.Name = "txtStartDate";
+			this.txtStartDate.Size = new System.Drawing.Size(100, 23);
+			this.txtStartDate.TabIndex = 40;
+			// 
+			// txtEndDate
+			// 
+			this.txtEndDate.Location = new System.Drawing.Point(250, 141);
+			this.txtEndDate.Name = "txtEndDate";
+			this.txtEndDate.Size = new System.Drawing.Size(100, 23);
+			this.txtEndDate.TabIndex = 41;
+			// 
+			// btnGenChartKTrend
+			// 
+			this.btnGenChartKTrend.Location = new System.Drawing.Point(356, 141);
+			this.btnGenChartKTrend.Name = "btnGenChartKTrend";
+			this.btnGenChartKTrend.Size = new System.Drawing.Size(54, 23);
+			this.btnGenChartKTrend.TabIndex = 42;
+			this.btnGenChartKTrend.Text = "K线图";
+			this.btnGenChartKTrend.UseVisualStyleBackColor = true;
+			this.btnGenChartKTrend.Click += new System.EventHandler(this.BtnGenChartKTrendClick);
 			// 
 			// MainForm
 			// 

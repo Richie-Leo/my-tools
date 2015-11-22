@@ -6,11 +6,11 @@ using System.IO;
 using Pandora.Basis.DB;
 using Pandora.Invest.Entity;
 
-namespace Pandora.Invest
+namespace Pandora.Invest.Html
 {
-	public class HtmlGenerate
+	public class HtmlChartGenerate
 	{
-		public void GenerateKTrendChart(Database db, int stockId, DateTime start, DateTime end){
+		public static void GenerateKTrendChart(Database db, int stockId, DateTime start, DateTime end){
 			IList<KJapaneseData> kdatas = KJapaneseData.Find (db, stockId, start, end);
 			KTrendJSON json = new KTrendJSON (){ 
 				dates = new List<string>(), 

@@ -28,6 +28,8 @@ namespace Pandora.Invest
 		}
 		void MainFormLoad(object sender, EventArgs e)
 		{
+			this.txtStartDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
+			this.txtEndDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 			this._progressController = new ProgressController(
 				this.timer, this.progressBar, this.lblProgressTitle, this.lblProgressInfo, this.lblProgressRate);
 			//校验
@@ -199,6 +201,14 @@ namespace Pandora.Invest
 			db.Close();
 			
 			MessageBox.Show("导入成功", "导入成功"); 
+		}
+		void BtnGenChartKTrendClick(object sender, EventArgs e)
+		{
+			Database db = new Database(this.txtDatabase.Text);
+			db.Open();
+			Pandora.Invest.Html.HtmlChartGenerate.GenerateKTrendChart(db, 
+			                                                          int.Parse(this.txtStockCode.Text), DateTime.Parse()
+			db.Close();
 		}
 		#endregion
 	}
