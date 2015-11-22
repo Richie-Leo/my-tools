@@ -30,11 +30,11 @@ namespace Pandora.Invest.Html
 				json.vmacs.Add (d.VMACusShort);
 				json.vmacl.Add (d.VMACusLong);
 			}
-			string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject (json);
+			string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject (json, Newtonsoft.Json.Formatting.Indented);
 			string fileName = "ktrend-chart.json";
 			if(File.Exists(fileName)) File.Delete(fileName);
 			File.CreateText(fileName).Close();
-			File.WriteAllText(fileName, jsonString, Encoding.GetEncoding("utf-8"));
+			File.WriteAllText(fileName, "var chartData = " + jsonString + ";", Encoding.GetEncoding("utf-8"));
 		}
 	}
 

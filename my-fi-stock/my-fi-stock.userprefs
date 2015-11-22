@@ -1,11 +1,6 @@
 ﻿<Properties StartupItem="my-fi-stock.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Html/HtmlGenerate.cs">
-    <Files>
-      <File FileName="Html/HtmlGenerate.cs" Line="31" Column="35" />
-      <File FileName="Html/trend-template.html" Line="24" Column="13" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
