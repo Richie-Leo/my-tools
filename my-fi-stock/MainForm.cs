@@ -15,7 +15,7 @@ namespace Pandora.Invest
 {
 	public partial class MainForm : Form
 	{
-		private const int THREAD_COUNT = 4;
+		private const int THREAD_COUNT = 1;
 		
 		private ProgressController _progressController;
 		
@@ -31,17 +31,17 @@ namespace Pandora.Invest
 			this._progressController = new ProgressController(
 				this.timer, this.progressBar, this.lblProgressTitle, this.lblProgressInfo, this.lblProgressRate);
 			//校验
-			string message = "开始自检...\r\n";
-			Database db = null;
-			try{
-				db = new Database(this.txtDatabase.Text);
-				db.Open();
-				message = message + "数据库连接 正常！\r\n";
-			}catch(Exception ex){
-				message = message + "数据库连接异常：" + ex.Message + "\r\n";
-			}
-			db.Close();
-			this.txtOutput.Text = message;
+			//string message = "开始自检...\r\n";
+			//Database db = null;
+			//try{
+			//	db = new Database(this.txtDatabase.Text);
+			//	db.Open();
+			//	message = message + "数据库连接 正常！\r\n";
+			//}catch(Exception ex){
+			//	message = message + "数据库连接异常：" + ex.Message + "\r\n";
+			//}
+			//db.Close();
+			//this.txtOutput.Text = message;
 		}
 		#endregion
 		

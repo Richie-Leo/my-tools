@@ -23,6 +23,7 @@
     <TargetFrameworkProfile />
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
+    <ApplicationIcon>lib\chart_stock.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -49,6 +50,13 @@
     <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
     <StartAction>Project</StartAction>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="" workingdir="" />
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
       <HintPath>lib\log4net.dll</HintPath>
@@ -70,6 +78,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="Winista.HtmlParser">
       <HintPath>lib\Winista.HtmlParser.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +126,7 @@
     <Compile Include="MThread\MThreadManager.cs" />
     <Compile Include="MThread\MThreadWorker.cs" />
     <Compile Include="MThread\MThreadContext.cs" />
+    <Compile Include="Html\HtmlGenerate.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -137,6 +149,29 @@
     <None Include="Resources\ERMacro\load-db-comment-4-stock.BAS" />
     <None Include="Resources\my-fi-stock.DM1" />
     <None Include="Rule\ReadMe.txt" />
+    <None Include="Html\trend-template.html" />
+    <None Include="Html\echarts-2.2.7\js\echarts.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\bar.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\chord.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\eventRiver.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\force.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\funnel.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\gauge.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\heatmap.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\k.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\line.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\map.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\pie.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\radar.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\scatter.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\tree.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\treemap.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\venn.js" />
+    <None Include="Html\echarts-2.2.7\js\chart\wordCloud.js" />
+    <None Include="lib\MySql.Data.dll" />
+    <None Include="lib\Newtonsoft.Json.dll" />
+    <None Include="lib\Newtonsoft.Json.xml" />
+    <None Include="lib\Winista.HtmlParser.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
@@ -147,11 +182,10 @@
     <Folder Include="Basis\Entity\" />
     <Folder Include="Basis\" />
     <Folder Include="DataCapture\" />
-    <Folder Include="Basis\" />
-    <Folder Include="Resources\" />
     <Folder Include="Resources\" />
     <Folder Include="Rule\" />
-    <Folder Include="Basis\" />
+    <Folder Include="Html\" />
+    <Folder Include="Html\echarts-2.2.7\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

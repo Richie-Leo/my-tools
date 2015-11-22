@@ -4,33 +4,8 @@ using System.Text;
 
 namespace Pandora.Basis.DB
 {
-	/// <summary>
-	/// 执行数据库批量插入操作。<br />
-	/// 使用示例：
-	/// <code>
-	/// Database db = new Database(connectString);
-	/// db.Open();
-	/// BulkInsert bi = db.CreateBulkInsert(
-	///     "sto_kline",  //表名称
-	///     new string[]{ "sto_id", "trans_date", "qty", "amt" }, //列名称
-	///     500); //batch size
-	/// for(int i=0; i&lt;values.Length; i++){
-	///    fields = values[i];
-	///    //BulkInsert会自动根据batch size执行数据库插入操作，无需使用者控制
-	///    bi.PushValues(new object[]{ 
-	///       stockId, date,
-	///       Convert.ToDecimal(fields[5]),
-	///       Convert.ToDecimal(fields[6]) //金额有小数
-	///    });
-	/// }
-	/// //将最后还剩余未达到batch size的数据提交到数据库
-	/// bi.Flush();
-	/// db.Close();
-	/// </code>
-	/// </summary>
 	public class BulkInserter<T>
 	{
-		private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(BulkInserter<T>));
 		private Database _db;
 		private string _table;
 		private string[] _columns;

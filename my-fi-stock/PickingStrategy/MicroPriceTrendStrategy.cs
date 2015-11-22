@@ -7,9 +7,6 @@ using Pandora.Basis.DB;
 
 namespace Pandora.Invest.PickingStrategy
 {
-	/// <summary>
-	/// 微观价格趋势策略执行类
-	/// </summary>
 	public class MicroPriceTrendStrategy : AbstractPickingStrategy
 	{
 		//震幅：amplitude，缩写为AM
@@ -18,11 +15,8 @@ namespace Pandora.Invest.PickingStrategy
 		//AM-Prev：比上一交易日涨跌幅【x%】以内
 		//Min-Matched-Days：需要连续匹配多少个十字星才符合该策略
 		//Starting-Point：起始点必须在离当前日期多少个交易日以内
-		//Regression：是否采用回归算法校验后续价格走势情况
 		
 		public MicroPriceTrendStrategy() {}
-		
-		public override string TypeName { get { return "CrossStar"; } }
 		
 		private class MatchingState{
 			public MatchingState() {}
@@ -90,10 +84,8 @@ namespace Pandora.Invest.PickingStrategy
 			decimal amMinMax = conf.GetDecimal("AM-Min-Max");
 			decimal amPrev = conf.GetDecimal("AM-Prev");
 			decimal amMatchedDays = conf.GetDecimal("AM-Matched-Days");
-			decimal ratioVolReduce = conf.GetDecimal("RatioVolReduce");
 			int minMatchedDays = conf.GetInt("Min-Matched-Days");
 			int startingPoint = conf.GetInt("Starting-Point");
-			bool regression = conf.GetBool("Regression");
 			
 			decimal value1 = 0, value2 = 0 ;
 			//微观价格条件匹配

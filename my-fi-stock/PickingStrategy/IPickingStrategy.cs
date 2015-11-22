@@ -11,10 +11,6 @@ namespace Pandora.Invest.PickingStrategy
 	public interface IPickingStrategy
 	{
 		/// <summary>
-		/// 策略名称
-		/// </summary>
-		string TypeName { get; }
-		/// <summary>
 		/// 执行策略选股。
 		/// 1.运用策略从量价特征中匹配出符合条件的买点；
 		/// 2.对买点后续价格趋势进行判断，确定买点是否成功；

@@ -37,7 +37,6 @@ namespace Pandora.Invest.DataCapture
 			using(StreamReader sr = new StreamReader(item, Encoding.Default)){
 				string line;
 				int lineNum = 0;
-				DateTime maxDate = new DateTime(1970,1,1);
 				while((line = sr.ReadLine()) != null){
 					lineNum++;
 					string[] fields;

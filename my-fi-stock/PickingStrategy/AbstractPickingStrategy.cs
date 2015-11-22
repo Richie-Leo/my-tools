@@ -34,8 +34,6 @@ namespace Pandora.Invest.PickingStrategy
 			return null;
 		}
 		
-		public abstract string TypeName { get; }
-		
 		public abstract IList<PickingResult> DoPicking(StrategyConfig conf, Stock sto, IList<KJapaneseData> kdatas
 			, IList<KTrendMAShort> masList, IList<KTrendMALong> malList, IList<KTrendVMALong> vmalList);
 	}

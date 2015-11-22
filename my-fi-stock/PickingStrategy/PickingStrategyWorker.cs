@@ -67,7 +67,7 @@ namespace Pandora.Invest.PickingStrategy
 						IList<PickingLog> pickingLogs = new List<PickingLog>(_strategies.Count);
 						for(int i=0; i<this._strategies.Count; i++){
 							PickingLog pLog = new PickingLog(){ 
-								Strategy = this._strategies[i].TypeName,
+								Strategy = "",
 								PickingMode = "", //TODO: 去掉PickingMode
 								StartTime = DateTime.Now,
 								EndTime = DateTime.MinValue,
@@ -104,8 +104,8 @@ namespace Pandora.Invest.PickingStrategy
 					matchedList[j].PickId = pickingLogs[i].PickId;
 					matchedList[j].StockId = item.StockId;
 					this._bi.Push(matchedList[j]);
-					Info("{" + item.StockCode + "-" + item.StockName + "} {matched}: by " + this._strategies[i].TypeName 
-					     + ", " + matchedList[j].StartDate.ToString("yyyyMMdd") + "->"
+					Info("{" + item.StockCode + "-" + item.StockName + "} {matched}: "
+					     + matchedList[j].StartDate.ToString("yyyyMMdd") + "->"
 					     + matchedList[j].EndDate.ToString("yyyyMMdd") + "(" + matchedList[j].TxDays + ")");
 				}
 			}

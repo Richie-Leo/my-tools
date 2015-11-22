@@ -12,36 +12,6 @@ namespace Pandora.Invest.Entity
 	{
 		private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(KJapaneseData));
 		public static long _dbTime = 0, _entityTime = 0;
-		
-//		public KJapaneseData() {}
-//		private KJapaneseData(DataRow row){
-//			this.Id = Convert.ToInt32(row[Mapper.Id]);
-//			this.StockId = Convert.ToInt32(row[Mapper.StockId]);
-//			
-//			this.TxDate = Convert.ToDateTime(row[Mapper.TxDate]);
-//			this.PrevDate = (DateTime)row[Mapper.PrevDate];
-//			
-//			this.PriceOpen = Convert.ToDecimal(row[Mapper.PriceOpen]);
-//			this.PriceMax = Convert.ToDecimal(row[Mapper.PriceMax]);
-//			this.PriceMin = Convert.ToDecimal(row[Mapper.PriceMin]);
-//			this.PriceClose = Convert.ToDecimal(row[Mapper.PriceClose]);
-//			this.PricePrev = Convert.ToDecimal(row[Mapper.PricePrev]);
-//			
-//			this.Volume = Convert.ToInt64(row[Mapper.Volume]);
-//			this.Amount = Convert.ToInt64(row[Mapper.Amount]);
-//			
-//			this.MA5 = Convert.ToDecimal(row[Mapper.MA5]);
-//			this.MA10 = Convert.ToDecimal(row[Mapper.MA10]);
-//			this.MA20 = Convert.ToDecimal(row[Mapper.MA20]);
-//			this.MA60 = Convert.ToDecimal(row[Mapper.MA60]);
-//			this.MA120 = Convert.ToDecimal(row[Mapper.MA120]);
-//			this.MA250 = Convert.ToDecimal(row[Mapper.MA250]);
-//
-//			this.MACusShort = Convert.ToDecimal(row[Mapper.MACusShort]);
-//			this.MACusLong = Convert.ToDecimal(row[Mapper.MACusLong]);
-//			this.VMACusShort = Convert.ToInt64(row[Mapper.VMACusShort]);
-//			this.VMACusLong = Convert.ToInt64(row[Mapper.VMACusLong]);
-//		}
 
 		/// <summary>
 		/// 批量导入日K线数据。
@@ -55,6 +25,7 @@ namespace Pandora.Invest.Entity
 			if(kdatas==null || kdatas.Count<=0) return 0;
 			try{
 				int stockId = kdatas[0].StockId;
+				if(stockId!=998) return 0; //TODO
 				DateTime start = DateTime.Now;
 				//因为要计算250日均线，所以向前加载K线数据
 				List<KJapaneseData> latest = FindLatest(db, stockId, 251)as List<KJapaneseData>; 
@@ -151,7 +122,7 @@ namespace Pandora.Invest.Entity
 				db.BeginTransaction();
 				//批量插入
 				try{
-					BulkInserter<KJapaneseData> bi = CreateBulkInserter(db, 200); //初步验证，一批次插入200条性能最好
+					BulkInserter<KJapaneseData> bi = new KJapaneseDataBulkInserter<KJapaneseData>(db, 200); //初步验证，一批次插入200条性能最好
 					for(int i=impStart; i<=impEnd; i++) bi.Push(latest[i]);
 					bi.Flush();
 					//更新受影响的双重9日均线价格
@@ -179,12 +150,12 @@ namespace Pandora.Invest.Entity
 		
 		private static void CalcCusMA(IList<KJapaneseData> impList, int impStart, int impEnd, CusMAType type){
 			//初始化参数
-			int n = 0, round = 0;
+			int n = 0, round = 0, weight = 0;
 			switch(type){
-					case CusMAType.MAShort: n = 2; round = 1; break;
-					case CusMAType.MALong: n = 4; round = 2; break;
-					case CusMAType.VMAShort: n = 2; round = 1; break;
-					case CusMAType.VMALong: n = 2; round = 3; break;
+				case CusMAType.MAShort: n = 2; round = 1; weight = 2; break;
+				case CusMAType.MALong: n = 4; round = 2; weight = 1; break;
+				case CusMAType.VMAShort: n = 2; round = 1; weight = 1; break;
+				case CusMAType.VMALong: n = 2; round = 3; weight = 1; break;
 			}
 			//待计算的节点从impStart到impEnd，因此而受影响、需要重新计算的节点从start到end
 			int start = impStart - n*round, end = impEnd;
@@ -217,7 +188,7 @@ namespace Pandora.Invest.Entity
 			
 			//进行计算
 			//注意：CalcCusMA需要的是计算起始点、终止点在values中的索引，而start、end是在kdatas中的索引，需要转换
-			IList<decimal> result = CalcCusMA(values, n, values.Count-1-n, n, round, type);
+			IList<decimal> result = CalcCusMA(values, n, values.Count-1-n, n, round, type, weight);
 			
 			//设置计算结果
 			int resultIndex = 0; //计算节点结果值的索引
@@ -261,13 +232,13 @@ namespace Pandora.Invest.Entity
 		/// <param name="type"></param>
 		/// <returns>返回结果均值列表，结果列表中索引0到最后的一个值分别对应values中索引start到end元素的计算结果均值。<br />
 		/// 每经过一轮计算，返回的结果列表元素个数比values减少2n个（头、为各减少n个）</returns>
-		private static IList<decimal> CalcCusMA(IList<decimal> values, int start, int end, int n, int round, CusMAType type){
+		private static IList<decimal> CalcCusMA(IList<decimal> values, int start, int end, int n, int round, CusMAType type, int weight){
 			int s=start, e=end; 
 			for(int loop=round; loop>=1; loop--){
 				//注意：
 				//1.CalcCusMA需要的是计算起始点、终止点在values中的索引，而start、end是在kdatas中的索引，不能使用start和end；
 				//2.每经历1次CalcCusMA调用，values中的元素个数减少2n个；
-				values = CalcCusMA(values, s, e, n, type); //第一次使用入参start、end作为CalcCusMA的start、end
+				values = CalcCusMA(values, s, e, n, type, weight); //第一次使用入参start、end作为CalcCusMA的start、end
 				//执行1次CalcCusMA后，values中前后多余的元素已经被移除，后续再调用CalcCusMA时，参数start、end即变成固定值
 				s = n;
 				e = values.Count-1-n;
@@ -284,27 +255,31 @@ namespace Pandora.Invest.Entity
 		/// <param name="type"></param>
 		/// <returns>返回结果均值列表，结果列表中索引0到最后的一个值分别对应values中索引start到end元素的计算结果均值。<br />
 		/// 每经过一轮计算，返回的结果列表元素个数比values减少2n个（头、为各减少n个）</returns>
-		private static IList<decimal> CalcCusMA(IList<decimal> values, int start, int end, int n, CusMAType type){
+		private static IList<decimal> CalcCusMA(IList<decimal> values, int start, int end, int n, CusMAType type, int weight){
 			List<decimal> r = new List<decimal>(end - start + 1);
 			decimal ma;
+			if(weight<=1) weight=1;
+			int count = 2*n+1 + weight-1; //参与均值计算的节点个数
 			for(int i=start; i<=end; i++){
 				switch(type){
-					case CusMAType.MAShort:
-					case CusMAType.MALong:
-						ma = values[i];
-						for(int j=1; j<=n; j++){
-							ma = ma + values[i+j] + values[i-j];
-						}
-						r.Add(ma / (2 * n + 1));
-						break;
-					case CusMAType.VMAShort:
-					case CusMAType.VMALong:
-						ma = values[i] * values[i];
-						for(int j=1; j<=n; j++){
-							ma = ma + values[i+j] * values[i+j] + values[i-j] * values[i-j];
-						}
-						r.Add( Convert.ToDecimal(Math.Sqrt(Convert.ToDouble(ma) / (2 * n + 1))) );
-						break;
+				case CusMAType.MAShort:
+				case CusMAType.MALong:
+					//均值
+					ma = values [i] * weight;
+					for (int j = 1; j <= n; j++) {
+						ma = ma + values [i + j] + values [i - j];
+					}
+					r.Add(ma / count);
+					break;
+				case CusMAType.VMAShort:
+				case CusMAType.VMALong:
+					//均方根值
+					ma = values [i] * values [i] * weight;
+					for (int j = 1; j <= n; j++) {
+						ma = ma + values [i + j] * values [i + j] + values [i - j] * values [i - j];
+					}
+					r.Add (Convert.ToDecimal (Math.Sqrt (Convert.ToDouble (ma) / count)));
+					break;
 				}
 			}
 			return r;
@@ -396,35 +371,22 @@ namespace Pandora.Invest.Entity
 			}
 			return result;
 		}
-		
-		#region 批量插入
-//		public class KLineDataBulkInserter<T> : BulkInserter<T>{
-//			public KLineDataBulkInserter(Database db, int batchSize) 
-//				: base(db, Mapper.TableName, new string[] {
-//				       		Mapper.StockId, Mapper.TxDate, Mapper.PrevDate,
-//				       		Mapper.PriceOpen, Mapper.PriceMax, Mapper.PriceMin, Mapper.PriceClose, Mapper.PricePrev,
-//				       		Mapper.Volume, Mapper.Amount,
-//				       		Mapper.MA5, Mapper.MA10, Mapper.MA20, Mapper.MA60, Mapper.MA120, Mapper.MA250, 
-//				       		Mapper.MACusShort, Mapper.MACusLong, Mapper.VMACusShort, Mapper.VMACusLong
-//				       }, batchSize) {}
-//			
-//			public override BulkInserter<T> Push(T obj){
-//				KJapaneseData e = obj as KJapaneseData;
-//				if(e == null) throw new EntityException("The type of obj is not KLineData");
-//				base.Push(new object[] {
-//				    e.StockId, e.TxDate, e.PrevDate,
-//				    e.PriceOpen, e.PriceMax, e.PriceMin, e.PriceClose, e.PricePrev,
-//				    e.Volume, e.Amount,
-//				    e.MA5, e.MA10, e.MA20, e.MA60, e.MA120, e.MA250, 
-//				    e.MACusShort, e.MACusLong, e.VMACusShort, e.VMACusLong
-//				});
-//				return this;
-//			}
-//		}
-		
-		public static BulkInserter<KJapaneseData> CreateBulkInserter(Database db, int batchSize){
-			return new KJapaneseDataBulkInserter<KJapaneseData>(db, batchSize);
-	    }
-		#endregion
+
+		public static IList<KJapaneseData> Find(Database db, int stockId, DateTime start, DateTime end){
+			DataSet ds = db.ExecDataSet(
+				string.Format("select * from {0} where {1}=?stoId and {2}>=?start and {2}<=?end order by {2}"
+					, Mapper.TableName, Mapper.StockId, Mapper.TxDate),
+				new string[]{"stoId", "start", "end"}, new object[]{ stockId, start, end }
+			);
+
+			List<KJapaneseData> result = new List<KJapaneseData>(ds.Tables[0].Rows.Count);
+			if(ds!=null && ds.Tables.Count>0 && ds.Tables[0].Rows.Count>0){
+				foreach(DataRow row in ds.Tables[0].Rows){
+					result.Add(new KJapaneseData(row));
+				}
+			}
+
+			return result;
+		}
 	}
 }

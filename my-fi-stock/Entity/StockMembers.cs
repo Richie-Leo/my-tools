@@ -5,9 +5,6 @@ using Pandora.Basis.DB;
 
 namespace Pandora.Invest.Entity
 {
-	/// <summary>
-	/// Description of StockMembers.
-	/// </summary>
 	public partial class Stock
 	{
 		public static IList<Stock> FindAll(Database db){
@@ -69,13 +66,9 @@ namespace Pandora.Invest.Entity
 		
 		public static IList<Stock> RemoveBlackList(IList<Stock> stocks){
 			IList<Stock> r = new List<Stock>(stocks.Count);
-			DateTime sinceDate = new DateTime(1990, 1, 1);
 			for(int i=0; i<stocks.Count; i++){
-				//移除ST股
 				if(stocks[i].StockName.IndexOf("ST", StringComparison.OrdinalIgnoreCase)>=0) continue;
-				//移除上市时间太短（2个月内）的新股
 				if(stocks[i].ListDate>DateTime.Now.AddMonths(-2)) continue;
-				//if(stocks[i].Code!="600010") continue;
 				r.Add(stocks[i]);
 			}
 			return r;
