@@ -206,11 +206,11 @@ namespace Pandora.Invest
 		{
 			Database db = new Database(this.txtDatabase.Text);
 			db.Open();
-//			Pandora.Invest.html.HtmlChartGenerate.GenerateMALineChart (db, 
-//				int.Parse (this.txtStockCode.Text), 
-//				DateTime.Parse (this.txtStartDate.Text), 
-//				DateTime.Parse (this.txtEndDate.Text)
-//			);
+			Pandora.Invest.Html.HtmlChartGenerate.GenerateMALineChart (db, 
+				int.Parse (this.txtStockCode.Text), 
+				DateTime.Parse (this.txtStartDate.Text), 
+				DateTime.Parse (this.txtEndDate.Text)
+			);
 			db.Close();
 		}
 		#endregion

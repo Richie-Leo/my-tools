@@ -7,10 +7,9 @@ using Pandora.Basis.DB;
 using Pandora.Invest.Entity;
 using Newtonsoft.Json;
 
-namespace Pandora.Invest.html
+namespace Pandora.Invest.Html
 {
-	public class HtmlChartGenerate
-	{
+	public class HtmlChartGenerate{
 		public static void GenerateMALineChart(Database db, int stockId, DateTime start, DateTime end){
 			IList<KJapaneseData> kdatas = KJapaneseData.Find (db, stockId, start, end);
             IDictionary<int, decimal> vertexes = new Dictionary<int, decimal>();
