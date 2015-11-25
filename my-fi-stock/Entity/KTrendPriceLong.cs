@@ -11,6 +11,16 @@ namespace Pandora.Invest.Entity
 		
 		public KTrendMALong() { }
 		private KTrendMALong(DataRow row) : base(row) {}
+        public KTrendMALong(KTrend trend){
+            this.Id = 0;
+            this.StockId = trend.StockId;
+            this.StartDate = trend.StartDate;
+            this.StartValue = trend.StartValue;
+            this.EndDate = trend.EndDate;
+            this.EndValue = trend.EndValue;
+            this.TxDays = trend.TxDays;
+            this.IncSpeed = trend.IncSpeed;
+        }
 		
 		public static int BatchImport(Database db, List<KTrendMALong> entities){
 			return BatchImport(db, TABLE_NAME, entities);

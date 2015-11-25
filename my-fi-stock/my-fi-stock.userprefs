@@ -1,9 +1,9 @@
 ﻿<Properties StartupItem="my-fi-stock.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="../../../old.txt">
+  <MonoDevelop.Ide.Workbench ActiveDocument="html/HtmlChartGenerate.cs">
     <Files>
-      <File FileName="../../../old.txt" Line="13" Column="20" />
-      <File FileName="../../../new.txt" Line="1" Column="1" />
+      <File FileName="html/HtmlChartGenerate.cs" Line="12" Column="32" />
+      <File FileName="MainForm.cs" Line="12" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

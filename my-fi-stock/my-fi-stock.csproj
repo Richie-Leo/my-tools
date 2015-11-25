@@ -56,17 +56,13 @@
     <Reference Include="log4net">
       <HintPath>lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="MySql.Data">
       <HintPath>lib\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -121,7 +117,6 @@
     <Compile Include="MThread\MThreadManager.cs" />
     <Compile Include="MThread\MThreadWorker.cs" />
     <Compile Include="MThread\MThreadContext.cs" />
-    <Compile Include="Html\HtmlGenerate.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -144,31 +139,68 @@
     <None Include="Resources\ERMacro\load-db-comment-4-stock.BAS" />
     <None Include="Resources\my-fi-stock.DM1" />
     <None Include="Rule\ReadMe.txt" />
-    <None Include="Html\trend-template.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Html\echarts-2.2.7\js\echarts.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\bar.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\chord.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\eventRiver.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\force.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\funnel.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\gauge.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\heatmap.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\k.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\line.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\map.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\pie.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\radar.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\scatter.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\tree.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\treemap.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\venn.js" />
-    <None Include="Html\echarts-2.2.7\js\chart\wordCloud.js" />
     <None Include="lib\MySql.Data.dll" />
     <None Include="lib\Newtonsoft.Json.dll" />
     <None Include="lib\Newtonsoft.Json.xml" />
     <None Include="lib\Winista.HtmlParser.dll" />
+    <None Include="html\HtmlChartGenerate.cs" />
+    <None Include="html\chart-maline.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\echarts.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\bar.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\chord.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\eventRiver.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\force.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\funnel.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\gauge.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\heatmap.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\k.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\line.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\map.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\pie.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\radar.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\scatter.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\tree.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\treemap.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\venn.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="html\echarts-2.2.7\js\chart\wordCloud.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
@@ -181,8 +213,8 @@
     <Folder Include="DataCapture\" />
     <Folder Include="Resources\" />
     <Folder Include="Rule\" />
-    <Folder Include="Html\" />
-    <Folder Include="Html\echarts-2.2.7\" />
+    <Folder Include="html\" />
+    <Folder Include="html\echarts-2.2.7\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -191,7 +223,7 @@
         <Policies>
           <DotNetNamingPolicy DirectoryNamespaceAssociation="Hierarchical" ResourceNamePolicy="FileFormatDefault" />
           <TextStylePolicy inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/x-csharp" />
-          <CSharpFormattingPolicy IndentSwitchBody="True" IndentBlocksInsideExpressions="True" AnonymousMethodBraceStyle="NextLine" PropertyBraceStyle="NextLine" PropertyGetBraceStyle="NextLine" PropertySetBraceStyle="NextLine" EventBraceStyle="NextLine" EventAddBraceStyle="NextLine" EventRemoveBraceStyle="NextLine" StatementBraceStyle="NextLine" ElseNewLinePlacement="NewLine" CatchNewLinePlacement="NewLine" FinallyNewLinePlacement="NewLine" WhileNewLinePlacement="DoNotCare" ArrayInitializerWrapping="DoNotChange" ArrayInitializerBraceStyle="NextLine" BeforeMethodDeclarationParentheses="False" BeforeMethodCallParentheses="False" BeforeConstructorDeclarationParentheses="False" NewLineBeforeConstructorInitializerColon="NewLine" NewLineAfterConstructorInitializerColon="SameLine" BeforeDelegateDeclarationParentheses="False" NewParentheses="False" SpacesBeforeBrackets="False" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentSwitchBody="True" IndentBlocksInsideExpressions="True" AutoPropertyFormatting="ForceOneLine" ClassBraceStyle="EndOfLineWithoutSpace" InterfaceBraceStyle="EndOfLineWithoutSpace" StructBraceStyle="EndOfLineWithoutSpace" EnumBraceStyle="EndOfLineWithoutSpace" MethodBraceStyle="EndOfLineWithoutSpace" AnonymousMethodBraceStyle="EndOfLineWithoutSpace" ConstructorBraceStyle="EndOfLineWithoutSpace" DestructorBraceStyle="EndOfLineWithoutSpace" PropertyBraceStyle="NextLine" PropertyGetBraceStyle="EndOfLineWithoutSpace" PropertySetBraceStyle="EndOfLineWithoutSpace" EventBraceStyle="NextLine" EventAddBraceStyle="EndOfLineWithoutSpace" EventRemoveBraceStyle="EndOfLineWithoutSpace" StatementBraceStyle="EndOfLineWithoutSpace" ElseNewLinePlacement="DoNotCare" CatchNewLinePlacement="DoNotCare" FinallyNewLinePlacement="DoNotCare" WhileNewLinePlacement="DoNotCare" ArrayInitializerWrapping="DoNotChange" ArrayInitializerBraceStyle="NextLine" BeforeMethodDeclarationParentheses="False" BeforeMethodCallParentheses="False" BeforeConstructorDeclarationParentheses="False" NewLineAfterConstructorInitializerColon="SameLine" BeforeDelegateDeclarationParentheses="False" NewParentheses="False" SpacesBeforeBrackets="False" AlignToFirstMethodDeclarationParameter="False" AlignToFirstIndexerDeclarationParameter="False" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
           <TextStylePolicy FileWidth="120" TabsToSpaces="False" inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/plain" />
         </Policies>
       </Properties>

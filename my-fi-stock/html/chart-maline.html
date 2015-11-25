@@ -12,7 +12,7 @@
 </div>
 
     <script src="echarts-2.2.7/js/echarts.js"></script>
-    <script src="ktrend-chart.json" type="text/javascript"></script>
+    <script src="chart-maline.json" type="text/javascript"></script>
     
 <script type="text/javascript">
 require.config({ paths:{ echarts:'./echarts-2.2.7/js' } });
@@ -20,6 +20,23 @@ require.config({ paths:{ echarts:'./echarts-2.2.7/js' } });
 require(
     [ 'echarts', 'echarts/chart/line', 'echarts/chart/bar', 'echarts/chart/k' ],
     function(ec){
+    	//format data
+    	var xaxis=[], k=[], macs=[], macl=[], vol=[], vmacs=[], vmacl=[], trend=[], min=9999, max=0;
+    	for(var i=0; klist && i<klist.length; i++){
+    		xaxis.push(klist[i].d);
+    		k.push( [ klist[i].o, klist[i].c, klist[i].mi, klist[i].ma ] );
+    		macs.push(klist[i].ms);
+    		macl.push(klist[i].ml);
+    		vol.push(klist[i].vol);
+    		vmacs.push(klist[i].vs);
+    		vmacl.push(klist[i].vl);
+    		trend.push(klist[i].vt ? klist[i].ms : '-');
+			if(klist[i].min<min) min=klist[i].min;
+			if(klist[i].max>max) max=klist[i].max;
+    	}
+    	min = Math.floor(min);
+    	max = Math.ceil(max);
+
     	var myChart = ec.init(document.getElementById('main'));
     	myChart.setOption({
 		    tooltip:{
@@ -44,15 +61,16 @@ require(
 		    //画图区域，类似于padding来设置画图区大小:[x, y, x2, y2] -> [left, top, right, bottom]
 		    grid:{ x:40, y:25, x2:20, y2:25 },
 		    xAxis:[{ 
-		    	type:'category', data:chartData.dates,
+		    	type:'category', data:xaxis,
 		    	boundaryGap:[0,0], axisLine:{show:false}, axisTick:{onGap:false},splitLine:{show:false}
-		        
 		    }],
-		    yAxis:[{ type:'value', axisLine:{show:false}, scale:true, boundaryGap:[0,0], splitNumber:10, splitArea:{show:true} }],
+		    yAxis:[{ type:'value', min:min, max:max,
+		    	axisLine:{show:false}, scale:true, splitArea:{show:true} }],
 		    series:[
-		    	{ name:'K-Japanese', type:'k', data:chartData.k },
-		        { name:'macs', type:'line', data:chartData.macs },
-		        { name:'macl', type:'line', data:chartData.macl }
+		    	{ name:'K-Japanese', type:'k', data:k },
+		        { name:'macs', type:'line', data:macs },
+		        { name:'macl', type:'line', data:macl },
+		        { name:'trend-zone', type:'scatter', data:trend }
 		    ]//series
 		});//myChart.setOption({
 
@@ -82,7 +100,7 @@ require(
 		    dataZoom:{ show:true, realtime:true, height:20, start:0, end:100 },
 		    grid:{ x:40, y:30, x2:20, y2:25 },
 		    xAxis:[{ 
-		    	type:'category', data:chartData.dates, position:'top', 
+		    	type:'category', data:xaxis, position:'top', 
 		    	boundaryGap:false, axisLine:{show:false}, axisLabel:{show:false}, axisTick:{onGap:false},splitLine:{show:false}
 		    }],
 		    yAxis:[{
@@ -91,9 +109,9 @@ require(
 		        axisLabel:{ formatter:function (v) { return Math.round(v/10000); } }
 		    }],
 		    series:[
-		    	{ name:'Volume', type:'bar', symbol:'none', data:chartData.vol },
-		    	{ name:'vmacs', type:'line', symbol:'none', data:chartData.vmacs },
-		    	{ name:'vmacl', type:'line', symbol:'none', data:chartData.vmacl }
+		    	{ name:'Volume', type:'bar', symbol:'none', data:vol },
+		    	{ name:'vmacs', type:'line', symbol:'none', data:vmacs },
+		    	{ name:'vmacl', type:'line', symbol:'none', data:vmacl }
 		    ]
 		});//myChart2.setOption({
 

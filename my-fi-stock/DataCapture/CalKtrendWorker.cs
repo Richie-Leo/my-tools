@@ -153,7 +153,7 @@ namespace Pandora.Invest.DataCapture
 			vlList.Add(vmaLong);
 			DateTime caculated = DateTime.Now;
 
-			plList = this.FixMALong (plList, psList);
+            plList = this.FixMALong (kdatas, plList, psList);
 			
 			KTrendMAShort.BatchImport(this._db, psList);
 			KTrendMALong.BatchImport(this._db, plList);
@@ -165,14 +165,129 @@ namespace Pandora.Invest.DataCapture
 			    + ", insert:" + ts3.TotalMilliseconds.ToString("F0"));
 		}
 
-		private List<KTrendMALong> FixMALong(List<KTrendMALong> listLong, List<KTrendMAShort> listShort){
-//			List<KTrendMALong> result = new List<KTrendMALong> (listLong.Count);
-//			foreach (KTrendMALong e in listLong)
-//				if (Math.Abs (e.IncSpeed) >= 1 || Math.Abs ((e.EndValue-e.StartValue)/e.StartValue) >= 0.3m)
-//					result.Add (e);
-//			return result;
-			return listLong;
+        private List<KTrendMALong> FixMALong(IList<KJapaneseData> kdatas, List<KTrendMALong> listLong, List<KTrendMAShort> listShort){
+			List<KTrendMALong> result = new List<KTrendMALong> (listLong.Count);
+            List<KTrendMAShort> strongShakes = new List<KTrendMAShort>();
+            //Find out strong shakes in short period
+            for(int i=0; i<listShort.Count; i++){
+                KTrendMAShort es = listShort[i];
+                if (Math.Abs((es.EndValue - es.StartValue) / es.StartValue) > 0.2m && es.IncSpeed >= 1){
+                    KTrendMALong containing = null;
+                    foreach(KTrendMALong el in listLong){
+                        if (es.StartDate >= el.StartDate && es.EndDate <= el.EndDate){
+                            if (i >= 2
+                                && listShort[i - 1].StartDate >= el.StartDate && listShort[i - 1].EndDate <= el.EndDate
+                                && listShort[i - 2].StartDate >= el.StartDate && listShort[i - 2].EndDate <= el.EndDate){
+                                containing = el;
+                                break;
+                            }
+                            if (i < listShort.Count - 2
+                                && listShort[i + 1].StartDate >= el.StartDate && listShort[i + 1].EndDate <= el.EndDate
+                                && listShort[i + 2].StartDate >= el.StartDate && listShort[i + 2].EndDate <= el.EndDate){
+                                containing = el;
+                                break;
+                            }
+                        }
+                    }
+                    if (containing != null)
+                        strongShakes.Add(es);
+                }
+            }
+            //Repartition listLong
+            for (int i = 0; i < listLong.Count; ){
+                if (strongShakes.Count <= 0){
+                    result.Add(listLong[i]);
+                    i++;
+                    continue;
+                }
+                if (listLong[i].EndDate <= strongShakes[0].StartDate){
+                    result.Add(listLong[i]);
+                    i++;
+                    continue;
+                }
+                KTrendMALong malong;
+                if (listLong[i].StartDate < strongShakes[0].StartDate){
+                    malong = new KTrendMALong()
+                    {
+                        Id = 0,
+                        StockId = listLong[i].StockId,
+                        StartDate = listLong[i].StartDate,
+                        StartValue = listLong[i].StartValue,
+                        EndDate = strongShakes[0].StartDate,
+                        EndValue = this.FindKData(kdatas, strongShakes[0].StartDate).MACusShort,
+                        TxDays = this.FindTxDays(kdatas, listLong[i].StartDate, strongShakes[0].StartDate)
+                    };
+                    malong.IncSpeed = this.CalcIncSpeed(malong.StartValue, malong.EndValue, malong.TxDays);
+                    result.Add(malong);
+                }
+                if (listLong[i].EndDate < strongShakes[0].EndDate){
+                    i++;
+                    continue;
+                }
+                malong = new KTrendMALong()
+                {
+                    Id = 0,
+                    StockId = strongShakes[0].StockId,
+                    StartDate = strongShakes[0].StartDate,
+                    StartValue = this.FindKData(kdatas, strongShakes[0].StartDate).MACusShort,
+                    EndDate = strongShakes[0].EndDate,
+                    EndValue = this.FindKData(kdatas, strongShakes[0].EndDate).MACusShort,
+                    TxDays = this.FindTxDays(kdatas, strongShakes[0].StartDate, strongShakes[0].EndDate)
+                };
+                malong.IncSpeed = this.CalcIncSpeed(malong.StartValue, malong.EndValue, malong.TxDays);
+                result.Add(malong);
+                if (listLong[i].StartDate < malong.EndDate){
+                    listLong[i].StartDate = malong.EndDate;
+                    listLong[i].StartValue = malong.EndValue;
+                    listLong[i].TxDays = this.FindTxDays(kdatas, listLong[i].StartDate, listLong[i].EndDate);
+                    listLong[i].IncSpeed = this.CalcIncSpeed(listLong[i].StartValue, listLong[i].EndValue, listLong[i].TxDays);
+                }
+                strongShakes.RemoveAt(0);
+            }
+            //Merging listLong: merge neighbours both amplitude is under 10%
+            for (int i = 0; i < result.Count-1; ){
+                decimal am1 = (result[i].EndValue - result[i].StartValue) / result[i].StartValue;
+                decimal am2 = (result[i+1].EndValue - result[i+1].StartValue) / result[i+1].StartValue;
+                if (Math.Abs(am1) < 0.1m && Math.Abs(am2) < 0.1m){
+                    KTrendMALong newLong = new KTrendMALong()
+                    {
+                            Id = 0,
+                            StockId = result[i].StockId,
+                            StartDate = result[i].StartDate,
+                            StartValue = result[i].StartValue,
+                            EndDate = result[i+1].EndDate,
+                            EndValue = result[i+1].EndValue,
+                            TxDays = result[i].TxDays + result[i+1].TxDays -1
+                    };
+                    newLong.IncSpeed = this.CalcIncSpeed(newLong.StartValue, newLong.EndValue, newLong.TxDays);
+                    result[i] = newLong;
+                    result.RemoveAt(i + 1);
+                    continue;
+                }
+                i++;
+            }
+
+			return result;
 		}
+
+        private KJapaneseData FindKData(IList<KJapaneseData> kdatas, DateTime date){
+            foreach (KJapaneseData k in kdatas)
+                if (k.TxDate == date)
+                    return k;
+            return null;
+        }
+
+        private int FindTxDays(IList<KJapaneseData> kdatas, DateTime start, DateTime end){
+            int result = 0;
+            foreach (KJapaneseData k in kdatas){
+                if (k.TxDate < start)
+                    continue;
+                if (k.TxDate > end)
+                    break;
+                result++;
+            }
+            return result;
+        }
 		
 		public override void AfterDo(MThreadContext context)
 		{
