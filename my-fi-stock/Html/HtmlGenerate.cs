@@ -5,6 +5,7 @@ using System.IO;
 
 using Pandora.Basis.DB;
 using Pandora.Invest.Entity;
+using Newtonsoft.Json;
 
 namespace Pandora.Invest.Html
 {
@@ -22,7 +23,7 @@ namespace Pandora.Invest.Html
 				vmacl = new List<long>()
 			};
 			foreach (KJapaneseData d in kdatas) {
-				json.dates.Add (d.TxDate.ToString("yyMMdd"));
+				json.dates.Add (d.TxDate.ToString("yyyy-MM-dd"));
 				json.k.Add (new decimal[] { d.PriceOpen, d.PriceClose, d.PriceMin, d.PriceMax });
 				json.macs.Add (d.MACusShort);
 				json.macl.Add (d.MACusLong);
@@ -30,8 +31,8 @@ namespace Pandora.Invest.Html
 				json.vmacs.Add (d.VMACusShort);
 				json.vmacl.Add (d.VMACusLong);
 			}
-			string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject (json, Newtonsoft.Json.Formatting.Indented);
-			string fileName = "ktrend-chart.json";
+			string jsonString = JsonConvert.SerializeObject (json, Formatting.Indented);
+			string fileName = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "ktrend-chart.json";
 			if(File.Exists(fileName)) File.Delete(fileName);
 			File.CreateText(fileName).Close();
 			File.WriteAllText(fileName, "var chartData = " + jsonString + ";", Encoding.GetEncoding("utf-8"));

@@ -14,91 +14,86 @@
     <script src="echarts-2.2.7/js/echarts.js"></script>
     <script src="ktrend-chart.json" type="text/javascript"></script>
     
-    <script type="text/javascript">
-require.config({
-    paths: {
-	echarts: './echarts-2.2.7/js',
-    }
-});
+<script type="text/javascript">
+require.config({ paths:{ echarts:'./echarts-2.2.7/js' } });
 
 require(
     [ 'echarts', 'echarts/chart/line', 'echarts/chart/bar', 'echarts/chart/k' ],
     function(ec){
     	var myChart = ec.init(document.getElementById('main'));
     	myChart.setOption({
-		    tooltip : {
-		        trigger: 'axis', showDelay: 0,
-		        formatter: function (params) {
+		    tooltip:{
+		        trigger:'axis', showDelay:0,
+		        formatter:function (params) {
 		        	//鼠标移动到图表区的提示信息，params[0, 1 .. n] 对应 series[0, 1 .. n]
 		            var res = params[0].name;
-		            res += '<br/>  开盘: ' + params[0].value[0] + '&nbsp;&nbsp;收盘: ' + params[0].value[1];
-		            res += '<br/>  最低: ' + params[0].value[2] + '&nbsp;&nbsp;最高: ' + params[0].value[3];
-		            res += '<br/>  短期: ' + params[1].value + '&nbsp;&nbsp;长期: ' + params[2].value;
+		            res += '<br/>  开盘:' + params[0].value[0] + '&nbsp;&nbsp;收盘:' + params[0].value[1];
+		            res += '<br/>  最低:' + params[0].value[2] + '&nbsp;&nbsp;最高:' + params[0].value[3];
+		            res += '<br/>  短期:' + params[1].value + '&nbsp;&nbsp;长期:' + params[2].value;
 		            return res;
 		        }
 		    },
-		    legend: { data:['K-Japanese','macs', 'macl'] },
-		    toolbox: { show : true,
-		        feature : {
-		            mark : {show: true},
-		            dataZoom : {show: true},
-		            magicType : {show: true, type: ['line', 'bar']},
-		            restore : {show: true},
-		            saveAsImage : {show: true}
+		    legend:{ data:['K-Japanese','macs', 'macl'] }, //图例
+		    toolbox:{ show:true, //右上角工具栏
+		        feature:{
+		            mark:{show:true}, //线条标记功能按钮
+		            dataZoom:{show:true}, //区域缩放功能按钮
+		            restore:{show:true}, //恢复功能按钮
+		            saveAsImage:{show:true} //另存为图片功能按钮
 		    }},
-		    grid: { x: 40, y: 30, x2:20, y2:25 },
-		    xAxis : [
-		    	{ type : 'category', boundaryGap : false, axisTick: {onGap:false}, splitLine: {show:false},axisLine: {show:false}, 
-		            data : chartData.dates
+		    //画图区域，类似于padding来设置画图区大小:[x, y, x2, y2] -> [left, top, right, bottom]
+		    grid:{ x:40, y:25, x2:20, y2:25 },
+		    xAxis:[{ 
+		    	type:'category', data:chartData.dates,
+		    	boundaryGap:[0,0], axisLine:{show:false}, axisTick:{onGap:false},splitLine:{show:false}
+		        
 		    }],
-		    yAxis : [ { type : 'value', axisLine: {show:false}, scale:true, boundaryGap: [0.05, 0.05] }],
-		    series : [
-		    	{ name:'K-Japanese', type:'k', data: chartData.k },
-		        { name:'macs', type:'line', data: chartData.macs },
-		        { name:'macl', type:'line', data: chartData.macl },
+		    yAxis:[{ type:'value', axisLine:{show:false}, scale:true, boundaryGap:[0,0], splitNumber:10, splitArea:{show:true} }],
+		    series:[
+		    	{ name:'K-Japanese', type:'k', data:chartData.k },
+		        { name:'macs', type:'line', data:chartData.macs },
+		        { name:'macl', type:'line', data:chartData.macl }
 		    ]//series
 		});//myChart.setOption({
 
 		var myChart2 = ec.init(document.getElementById('main2'));
 		myChart2.setOption({
-		    tooltip : { 
-		    	trigger: 'axis', showDelay: 0,
-		    	formatter: function (params) {
+		    tooltip:{ 
+		    	trigger:'axis', showDelay:0,
+		    	formatter:function (params) {
 		            var res = params[0].name;
-		            res += '<br/>  成交量: ' + Math.round(params[0].value/1000)/10 + '万';
-		            res += '<br/>  短　期: ' + Math.round(params[1].value/1000)/10 + '万';
-		            res += '<br/>  长　期: ' + Math.round(params[2].value/1000)/10 + '万';
+		            res += '<br/>  成交量:' + Math.round(params[0].value/1000)/10 + '万';
+		            res += '<br/>  短　期:' + Math.round(params[1].value/1000)/10 + '万';
+		            res += '<br/>  长　期:' + Math.round(params[2].value/1000)/10 + '万';
 		            return res;
 		        }
 		    },
-		    legend: { data:['Volume','vmacs', 'vmacl'] },
-		    toolbox: {
-		        y : -30, show : true, 
-		        feature : {
-		            mark : {show: true},
-		            dataZoom : {show: true},
-		            dataView : {show: true, readOnly: false},
-		            magicType : {show: true, type: ['line', 'bar']},
-		            restore : {show: true},
-		            saveAsImage : {show: true}
+		    legend:{ data:['Volume','vmacs', 'vmacl'] },
+		    toolbox:{
+		        y:-30, show:true, 
+		        feature:{
+		            mark:{show:true},
+		            dataZoom:{show:true},
+		            dataView:{show:true, readOnly:false},
+		            restore:{show:true},
+		            saveAsImage:{show:true}
 		        }
 		    },
-		    dataZoom : { show : true, realtime: true, start : 0, end : 100 },
-		    grid: { x: 40, y: 30, x2:20, y2:36 },
-		    xAxis : [{ 
-		    	type: 'category', position:'top', boundaryGap: false, 
-		    	axisLine: {show:false}, axisLabel:{show:false}, axisTick: {onGap:false},splitLine: {show:false}, 
-		    	data: chartData.dates
+		    dataZoom:{ show:true, realtime:true, height:20, start:0, end:100 },
+		    grid:{ x:40, y:30, x2:20, y2:25 },
+		    xAxis:[{ 
+		    	type:'category', data:chartData.dates, position:'top', 
+		    	boundaryGap:false, axisLine:{show:false}, axisLabel:{show:false}, axisTick:{onGap:false},splitLine:{show:false}
 		    }],
-		    yAxis : [{
-		        type : 'value', scale:true, boundaryGap: [0, 0],
-		        axisLine: {show:false}, axisLabel: { formatter: function (v) { return Math.round(v/10000); } },
-		        splitArea : {show : true}
+		    yAxis:[{
+		        type:'value', scale:true, boundaryGap:[0,0], splitNumber:5,
+		        axisLine:{show:false}, splitArea:{show:true}, 
+		        axisLabel:{ formatter:function (v) { return Math.round(v/10000); } }
 		    }],
-		    series : [
-		    	{ name:'Volume', type:'bar', symbol: 'none', data: chartData.vol },
-		    	{ name:'vmacs', type:'line', symbol: 'none', data: chartData.vmacs },
-		    	{ name:'vmacl', type:'line', symbol: 'none', data: chartData.vmacl }
+		    series:[
+		    	{ name:'Volume', type:'bar', symbol:'none', data:chartData.vol },
+		    	{ name:'vmacs', type:'line', symbol:'none', data:chartData.vmacs },
+		    	{ name:'vmacl', type:'line', symbol:'none', data:chartData.vmacl }
 		    ]
 		});//myChart2.setOption({
 
@@ -113,6 +108,6 @@ require(
 		},200);
     }//function(ec){
 );//require(
-    </script>
+</script>
 </body>
 </html>
