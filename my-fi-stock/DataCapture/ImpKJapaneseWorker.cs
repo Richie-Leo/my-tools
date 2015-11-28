@@ -34,7 +34,7 @@ namespace Pandora.Invest.DataCapture
 			Stock stock = null;
 			DateTime start = DateTime.Now;
 			
-			using(StreamReader sr = new StreamReader(item, Encoding.Default)){
+            using(StreamReader sr = new StreamReader(item, Encoding.Default)){
 				string line;
 				int lineNum = 0;
 				while((line = sr.ReadLine()) != null){
@@ -85,14 +85,14 @@ namespace Pandora.Invest.DataCapture
 					
 					KJapaneseData e = new KJapaneseData(){
 						    StockId = stock.StockId, TxDate = date,
-						    PriceOpen = Convert.ToDecimal(fields[1]),
-						    PriceMax = Convert.ToDecimal(fields[2]),
-						    PriceMin = Convert.ToDecimal(fields[3]),
-						    PriceClose = Convert.ToDecimal(fields[4]),
+						    OpenPrice = Convert.ToDecimal(fields[1]),
+						    HighPrice = Convert.ToDecimal(fields[2]),
+						    LowPrice = Convert.ToDecimal(fields[3]),
+						    ClosePrice = Convert.ToDecimal(fields[4]),
 						    Volume = Convert.ToInt64(Convert.ToDecimal(fields[5])),
 						    Amount = Convert.ToInt64(Convert.ToDecimal(fields[6]))
 					};
-					if(e.PriceClose>0.1m && e.PriceOpen>0.1m && e.Volume>0)
+					if(e.ClosePrice>0.1m && e.OpenPrice>0.1m && e.Volume>0)
 						kdatas.Add(e);
 				}
 			}

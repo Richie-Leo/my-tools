@@ -60,7 +60,7 @@ namespace Pandora.Invest.Entity
 				cloneTarget = kdatas[kdatas.Count-1];
 				long latestEffectiveVol = cloneTarget.Volume;
 				for(int i=kdatas.Count-1; i>=0; i--){
-					if(!kdatas[i].IsAllDayOnLimitedPrice()){
+					if(!kdatas[i].IsAllDayOnFusingPrice()){
 						latestEffectiveVol = kdatas[i].Volume;
 						break;
 					}
@@ -77,44 +77,44 @@ namespace Pandora.Invest.Entity
 				//初始化各均线价格
 				decimal ma5=0, ma10=0, ma20=0, ma60=0, ma120=0, ma250=0;
 				for(int i=0; i<impStart; i++){
-					ma250 += latest[i].PriceClose;
-					if(impStart-i<=120) ma120 += latest[i].PriceClose;
-					if(impStart-i<=60) ma60 += latest[i].PriceClose;
-					if(impStart-i<=20) ma20 += latest[i].PriceClose;
-					if(impStart-i<=10) ma10 += latest[i].PriceClose;
-					if(impStart-i<=5) ma5 += latest[i].PriceClose;
+					ma250 += latest[i].ClosePrice;
+					if(impStart-i<=120) ma120 += latest[i].ClosePrice;
+					if(impStart-i<=60) ma60 += latest[i].ClosePrice;
+					if(impStart-i<=20) ma20 += latest[i].ClosePrice;
+					if(impStart-i<=10) ma10 += latest[i].ClosePrice;
+					if(impStart-i<=5) ma5 += latest[i].ClosePrice;
 				}
 				for(int i=impStart; i<=impEnd; i++){
 					//设置上一交易日日期及价格
 					if(!latest[i-1].IsCloned()){
 						latest[i].PrevDate = latest[i-1].TxDate;
-						latest[i].PricePrev = latest[i-1].PriceClose;
+						latest[i].PrevPrice = latest[i-1].ClosePrice;
 					}
 					//5日均线价格
-					ma5 = ma5 + latest[i].PriceClose - latest[i-5].PriceClose;
+					ma5 = ma5 + latest[i].ClosePrice - latest[i-5].ClosePrice;
 					latest[i].MA5 = ma5 / 5;
 					//10日均线价格
-					ma10 = ma10 + latest[i].PriceClose - latest[i-10].PriceClose;
+					ma10 = ma10 + latest[i].ClosePrice - latest[i-10].ClosePrice;
 					latest[i].MA10 = ma10 / 10;
 					//20日均线价格
-					ma20 = ma20 + latest[i].PriceClose - latest[i-20].PriceClose;
+					ma20 = ma20 + latest[i].ClosePrice - latest[i-20].ClosePrice;
 					latest[i].MA20 = ma20 / 20;
 					//60日均线价格
-					ma60 = ma60 + latest[i].PriceClose - latest[i-60].PriceClose;
+					ma60 = ma60 + latest[i].ClosePrice - latest[i-60].ClosePrice;
 					latest[i].MA60 = ma60 / 60;
 					//120日均线价格
-					ma120 = ma120 + latest[i].PriceClose - latest[i-120].PriceClose;
+					ma120 = ma120 + latest[i].ClosePrice - latest[i-120].ClosePrice;
 					latest[i].MA120 = ma120 / 120;
 					//250日均线价格
-					ma250 = ma250 + latest[i].PriceClose - latest[i-250].PriceClose;
+					ma250 = ma250 + latest[i].ClosePrice - latest[i-250].ClosePrice;
 					latest[i].MA250 = ma250 / 250;
 				}
 				#endregion
 				
-				CalcCusMA(latest, impStart, impEnd, CusMAType.MAShort);
-				CalcCusMA(latest, impStart, impEnd, CusMAType.MALong);
-				CalcCusMA(latest, impStart, impEnd, CusMAType.VMAShort);
-				CalcCusMA(latest, impStart, impEnd, CusMAType.VMALong);
+				CalculateMA(latest, impStart, impEnd, MAType.MAShort);
+				CalculateMA(latest, impStart, impEnd, MAType.MALong);
+				CalculateMA(latest, impStart, impEnd, MAType.VMAShort);
+				CalculateMA(latest, impStart, impEnd, MAType.VMALong);
 				
 				DateTime afterCalc = DateTime.Now;
 			
@@ -130,7 +130,7 @@ namespace Pandora.Invest.Entity
 					if(startIndex<0) startIndex = 0;
 					if(startIndex<persistedStart) startIndex = persistedStart;
 					for(int i=startIndex; i<impStart; i++)
-						latest[i].UpdateMACus(db);
+						latest[i].UpdateMA(db);
 					db.CommitTransaction();
 				}catch(Exception exInner){
 					db.RollbackTransaction();
@@ -146,16 +146,16 @@ namespace Pandora.Invest.Entity
 		}
 		
 		#region 计算定制化的均价、均量
-		enum CusMAType { MAShort = 1, MALong = 2, VMAShort = 3, VMALong = 4 }
+		enum MAType { MAShort = 1, MALong = 2, VMAShort = 3, VMALong = 4 }
 		
-		private static void CalcCusMA(IList<KJapaneseData> impList, int impStart, int impEnd, CusMAType type){
+		private static void CalculateMA(IList<KJapaneseData> impList, int impStart, int impEnd, MAType type){
 			//初始化参数
 			int n = 0, round = 0, weight = 0;
 			switch(type){
-				case CusMAType.MAShort: n = 2; round = 1; weight = 2; break;
-				case CusMAType.MALong: n = 4; round = 2; weight = 1; break;
-				case CusMAType.VMAShort: n = 2; round = 1; weight = 1; break;
-				case CusMAType.VMALong: n = 2; round = 3; weight = 1; break;
+				case MAType.MAShort: n = 2; round = 1; weight = 2; break;
+				case MAType.MALong: n = 4; round = 2; weight = 1; break;
+				case MAType.VMAShort: n = 2; round = 1; weight = 1; break;
+				case MAType.VMALong: n = 2; round = 3; weight = 1; break;
 			}
 			//待计算的节点从impStart到impEnd，因此而受影响、需要重新计算的节点从start到end
 			int start = impStart - n*round, end = impEnd;
@@ -164,15 +164,15 @@ namespace Pandora.Invest.Entity
 			//注意：因为计算均量时会忽略一字板涨跌停日期，因此values中元素个数可能小于end-start+1。
 			IList<decimal> values = new List<decimal>(end - start + 1 + n*2*round); //前、后多取n个节点，乘以2
 			switch(type){
-				case CusMAType.MAShort:
-				case CusMAType.MALong:
+				case MAType.MAShort:
+				case MAType.MALong:
 					//为了计算start到end的均价、均量值，需前、后追加n*round个k线数据
 					for(int i=start-n*round; i<=end+n*round; i++){
-						values.Add(impList[i].PriceClose);
+						values.Add(impList[i].ClosePrice);
 					}
 					break;
-				case CusMAType.VMAShort:
-				case CusMAType.VMALong: //忽略一字板涨跌停
+				case MAType.VMAShort:
+				case MAType.VMALong: //忽略一字板涨跌停
 					//头部追加部分
 					for(int i=impStart-1; i>=0 && values.Count < n*round*2; i--){ //从start开始往前推，尝试找到2*n*round个非1字板数据
 						if(!ShouldBeIgnored(impList[i])) values.Insert(0, Convert.ToDecimal(impList[i].Volume));
@@ -188,29 +188,29 @@ namespace Pandora.Invest.Entity
 			
 			//进行计算
 			//注意：CalcCusMA需要的是计算起始点、终止点在values中的索引，而start、end是在kdatas中的索引，需要转换
-			IList<decimal> result = CalcCusMA(values, n, values.Count-1-n, n, round, type, weight);
+			IList<decimal> result = CalculateMA(values, n, values.Count-1-n, n, round, type, weight);
 			
 			//设置计算结果
 			int resultIndex = 0; //计算节点结果值的索引
 			for(int i=start; i<=end; i++){
 				switch(type){
-					case CusMAType.MAShort:
-						impList[i].MACusShort = result[resultIndex++]; //注意：计算节点的结果值在result中从索引0开始
+					case MAType.MAShort:
+						impList[i].MAShort = result[resultIndex++]; //注意：计算节点的结果值在result中从索引0开始
 						break;
-					case CusMAType.MALong:
-						impList[i].MACusLong = result[resultIndex++];
+					case MAType.MALong:
+						impList[i].MALong = result[resultIndex++];
 						break;
-					case CusMAType.VMAShort:
+					case MAType.VMAShort:
 						if(ShouldBeIgnored(impList[i]))
-							impList[i].VMACusShort = impList[i-1].VMACusShort;
+							impList[i].VMAShort = impList[i-1].VMAShort;
 						else
-							impList[i].VMACusShort = Convert.ToInt64(result[resultIndex++]);
+							impList[i].VMAShort = Convert.ToInt64(result[resultIndex++]);
 						break;
-					case CusMAType.VMALong:
+					case MAType.VMALong:
 						if(ShouldBeIgnored(impList[i]))
-							impList[i].VMACusLong = impList[i-1].VMACusLong;
+							impList[i].VMALong = impList[i-1].VMALong;
 						else
-							impList[i].VMACusLong = Convert.ToInt64(result[resultIndex++]);
+							impList[i].VMALong = Convert.ToInt64(result[resultIndex++]);
 						break;
 				}
 			}
@@ -218,7 +218,7 @@ namespace Pandora.Invest.Entity
 		private static bool ShouldBeIgnored(KJapaneseData e){
 			if(e==null) return true;
 			if(e.IsCloned()) return false;
-			if(e.IsAllDayOnLimitedPrice()) return true;
+			if(e.IsAllDayOnFusingPrice()) return true;
 			return false;
 		}
 		/// <summary>
@@ -232,13 +232,13 @@ namespace Pandora.Invest.Entity
 		/// <param name="type"></param>
 		/// <returns>返回结果均值列表，结果列表中索引0到最后的一个值分别对应values中索引start到end元素的计算结果均值。<br />
 		/// 每经过一轮计算，返回的结果列表元素个数比values减少2n个（头、为各减少n个）</returns>
-		private static IList<decimal> CalcCusMA(IList<decimal> values, int start, int end, int n, int round, CusMAType type, int weight){
+		private static IList<decimal> CalculateMA(IList<decimal> values, int start, int end, int n, int round, MAType type, int weight){
 			int s=start, e=end; 
 			for(int loop=round; loop>=1; loop--){
 				//注意：
 				//1.CalcCusMA需要的是计算起始点、终止点在values中的索引，而start、end是在kdatas中的索引，不能使用start和end；
 				//2.每经历1次CalcCusMA调用，values中的元素个数减少2n个；
-				values = CalcCusMA(values, s, e, n, type, weight); //第一次使用入参start、end作为CalcCusMA的start、end
+				values = CalculateMA(values, s, e, n, type, weight); //第一次使用入参start、end作为CalcCusMA的start、end
 				//执行1次CalcCusMA后，values中前后多余的元素已经被移除，后续再调用CalcCusMA时，参数start、end即变成固定值
 				s = n;
 				e = values.Count-1-n;
@@ -255,15 +255,15 @@ namespace Pandora.Invest.Entity
 		/// <param name="type"></param>
 		/// <returns>返回结果均值列表，结果列表中索引0到最后的一个值分别对应values中索引start到end元素的计算结果均值。<br />
 		/// 每经过一轮计算，返回的结果列表元素个数比values减少2n个（头、为各减少n个）</returns>
-		private static IList<decimal> CalcCusMA(IList<decimal> values, int start, int end, int n, CusMAType type, int weight){
+		private static IList<decimal> CalculateMA(IList<decimal> values, int start, int end, int n, MAType type, int weight){
 			List<decimal> r = new List<decimal>(end - start + 1);
 			decimal ma;
 			if(weight<=1) weight=1;
 			int count = 2*n+1 + weight-1; //参与均值计算的节点个数
 			for(int i=start; i<=end; i++){
 				switch(type){
-				case CusMAType.MAShort:
-				case CusMAType.MALong:
+				case MAType.MAShort:
+				case MAType.MALong:
 					//均值
 					ma = values [i] * weight;
 					for (int j = 1; j <= n; j++) {
@@ -271,8 +271,8 @@ namespace Pandora.Invest.Entity
 					}
 					r.Add(ma / count);
 					break;
-				case CusMAType.VMAShort:
-				case CusMAType.VMALong:
+				case MAType.VMAShort:
+				case MAType.VMALong:
 					//均方根值
 					ma = values [i] * values [i] * weight;
 					for (int j = 1; j <= n; j++) {
@@ -293,19 +293,19 @@ namespace Pandora.Invest.Entity
 			) > 0;
 		}
 		
-		private bool UpdateMACus(Database db){
+		private bool UpdateMA(Database db){
 			return db.ExecNonQuery(
 				string.Format("update {0} set {2}=?macs, {3}=?macl, {4}=?vmacs, {5}=?vmacl where {1}=?id"
-				              , Mapper.TableName, Mapper.Id, Mapper.MACusShort, Mapper.MACusLong, Mapper.VMACusShort, Mapper.VMACusLong),
+				              , Mapper.TableName, Mapper.Id, Mapper.MAShort, Mapper.MALong, Mapper.VMAShort, Mapper.VMALong),
 				new string[] { "id", "macs", "macl", "vmacs", "vmacl" }, 
-				new object[] { this.Id, this.MACusShort, this.MACusLong, this.VMACusShort, this.VMACusLong }
+				new object[] { this.Id, this.MAShort, this.MALong, this.VMAShort, this.VMALong }
 			) > 0;
 		}
 		
 		private KJapaneseData Clone(int days){
 			return new KJapaneseData(){
 				Id = -9999, StockId = this.StockId, TxDate = this.TxDate.AddDays(days),
-				PriceOpen = this.PriceOpen, PriceMax = this.PriceMax, PriceMin = this.PriceMin, PriceClose = this.PriceClose,
+				OpenPrice = this.OpenPrice, HighPrice = this.HighPrice, LowPrice = this.LowPrice, ClosePrice = this.ClosePrice,
 				Volume = this.Volume, Amount = this.Amount
 			};
 		}
@@ -318,11 +318,11 @@ namespace Pandora.Invest.Entity
 		/// 是否全天位于1字板涨跌停价位
 		/// </summary>
 		/// <returns></returns>
-		public bool IsAllDayOnLimitedPrice(){
-			return this.PriceOpen>0
-				&& this.PriceOpen==this.PriceMax
-				&& this.PriceOpen==this.PriceMin
-				&& this.PriceOpen==this.PriceClose;
+		public bool IsAllDayOnFusingPrice(){
+			return this.OpenPrice>0
+				&& this.OpenPrice==this.HighPrice
+				&& this.OpenPrice==this.LowPrice
+				&& this.OpenPrice==this.ClosePrice;
 		}
 		
 		/// <summary>

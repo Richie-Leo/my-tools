@@ -25,7 +25,7 @@ namespace Pandora.Invest.DataCapture
         private void CalcIncSpeed(KTrend k){
             if (k.TxDays <= 1 || k.StartValue==0)
 				return;
-            k.IncSpeed = Convert.ToDecimal(Math.Pow(Convert.ToDouble(k.EndValue / k.StartValue), Convert.ToDouble(1.0 / (k.TxDays - 1))) - 1) * 100;
+            k.ChangeSpeed = Convert.ToDecimal(Math.Pow(Convert.ToDouble(k.EndValue / k.StartValue), Convert.ToDouble(1.0 / (k.TxDays - 1))) - 1) * 100;
 		}
 		
 		public override void Do(MThreadContext context, Stock item)
@@ -46,9 +46,9 @@ namespace Pandora.Invest.DataCapture
 			List<KTrendMALong> plList = new List<KTrendMALong>();
 			List<KTrendMAShort> psList = new List<KTrendMAShort>();
 			List<KTrendVMALong> vlList = new List<KTrendVMALong>();
-			bool plFlag = kdatas[1].MACusLong>kdatas[0].MACusLong
-				, psFlag = kdatas[1].MACusShort>kdatas[0].MACusShort
-				, vlFlag = kdatas[1].VMACusLong>kdatas[0].VMACusLong
+			bool plFlag = kdatas[1].MALong>kdatas[0].MALong
+				, psFlag = kdatas[1].MAShort>kdatas[0].MAShort
+				, vlFlag = kdatas[1].VMALong>kdatas[0].VMALong
 				, upTrend;
 			int plStart=0, psStart=0, vlStart=0, days;
 			long min, max;
@@ -57,14 +57,14 @@ namespace Pandora.Invest.DataCapture
 			KTrendMAShort maShort;
 			for(int i=1; i<kdatas.Count; i++){
 				//短期价格趋势
-				if(kdatas[i].MACusShort!=kdatas[i-1].MACusShort){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
-					if((kdatas[i].MACusShort>kdatas[i-1].MACusShort)!=psFlag){ //是否趋势转换节点
+				if(kdatas[i].MAShort!=kdatas[i-1].MAShort){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
+					if((kdatas[i].MAShort>kdatas[i-1].MAShort)!=psFlag){ //是否趋势转换节点
 						maShort = new KTrendMAShort () {
 							StockId = item.StockId, 
                             StartDate = kdatas [psStart].TxDate, EndDate = kdatas [i - 1].TxDate,
-							StartValue = kdatas [psStart].PriceClose, EndValue = kdatas [i - 1].PriceClose,
+							StartValue = kdatas [psStart].ClosePrice, EndValue = kdatas [i - 1].ClosePrice,
 							TxDays = (i - 1) - psStart + 1,
-							IncSpeed = 0
+							ChangeSpeed = 0
 						};
                         this.CalcIncSpeed(maShort);
 						psList.Add(maShort);
@@ -73,15 +73,15 @@ namespace Pandora.Invest.DataCapture
 					}
 				}
 				//长期价格趋势
-				if(kdatas[i].MACusLong!=kdatas[i-1].MACusLong){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
-					if((kdatas[i].MACusLong>kdatas[i-1].MACusLong)!=plFlag){ //是否趋势转换节点
+				if(kdatas[i].MALong!=kdatas[i-1].MALong){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
+					if((kdatas[i].MALong>kdatas[i-1].MALong)!=plFlag){ //是否趋势转换节点
 						//plStart：该趋势区间起始索引；i-1：该趋势区间截止索引
 						maLong = new KTrendMALong () {
 							StockId = item.StockId, 
                             StartDate = kdatas [plStart].TxDate, EndDate = kdatas [i - 1].TxDate,
-                            StartValue = kdatas [plStart].PriceClose, EndValue = kdatas [i - 1].PriceClose,
+                            StartValue = kdatas [plStart].ClosePrice, EndValue = kdatas [i - 1].ClosePrice,
 							TxDays = (i - 1) - plStart + 1,
-							IncSpeed = 0 
+							ChangeSpeed = 0 
 						};
                         this.CalcIncSpeed(maLong);
 						plList.Add(maLong);
@@ -90,18 +90,18 @@ namespace Pandora.Invest.DataCapture
 					}
 				}
 				//长期成交量趋势
-				if(kdatas[i].VMACusLong!=kdatas[i-1].VMACusLong){ //成交量相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
-					if((kdatas[i].VMACusLong>kdatas[i-1].VMACusLong)!=vlFlag){ //是否趋势转换节点
+				if(kdatas[i].VMALong!=kdatas[i-1].VMALong){ //成交量相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
+					if((kdatas[i].VMALong>kdatas[i-1].VMALong)!=vlFlag){ //是否趋势转换节点
 						vmaLong = new KTrendVMALong(){
 							StockId=item.StockId, StartDate=kdatas[vlStart].TxDate, EndDate=kdatas[i-1].TxDate,
-							StartValue=0, EndValue=0, TxDays = (i-1) - vlStart + 1, IncSpeed=0
+							StartValue=0, EndValue=0, TxDays = (i-1) - vlStart + 1, ChangeSpeed=0
 					    };
 						upTrend = kdatas[vlStart].Volume < kdatas[i-1].Volume;
 						max = upTrend ? kdatas[i-1].Volume : kdatas[vlStart].Volume;
 						min = upTrend ? kdatas[vlStart].Volume : kdatas[i-1].Volume;
 						days=(i-1) - vlStart + 1;
 						for(int j=vlStart; j<=i-1; j++){
-							if(kdatas[j].IsAllDayOnLimitedPrice()){
+							if(kdatas[j].IsAllDayOnFusingPrice()){
 								days--;
 								continue;
 							}
@@ -121,9 +121,9 @@ namespace Pandora.Invest.DataCapture
 
 			maShort = new KTrendMAShort () {
 				StockId = item.StockId, StartDate = kdatas [psStart].TxDate, EndDate = kdatas [kdatas.Count - 1].TxDate,
-				StartValue = kdatas [psStart].PriceClose, EndValue = kdatas [kdatas.Count - 1].PriceClose,
+				StartValue = kdatas [psStart].ClosePrice, EndValue = kdatas [kdatas.Count - 1].ClosePrice,
 				TxDays = (kdatas.Count - 1) - psStart + 1,
-				IncSpeed = 0
+				ChangeSpeed = 0
 			};
             this.CalcIncSpeed(maShort);
 			psList.Add(maShort);
@@ -131,23 +131,23 @@ namespace Pandora.Invest.DataCapture
 			maLong = new KTrendMALong () {
 				StockId = item.StockId, 
                 StartDate = kdatas [plStart].TxDate, EndDate = kdatas [kdatas.Count - 1].TxDate,
-                StartValue = kdatas [plStart].PriceClose, EndValue = kdatas [kdatas.Count - 1].PriceClose,
+                StartValue = kdatas [plStart].ClosePrice, EndValue = kdatas [kdatas.Count - 1].ClosePrice,
 				TxDays = (kdatas.Count - 1) - plStart + 1,
-				IncSpeed = 0
+				ChangeSpeed = 0
 			};
             this.CalcIncSpeed(maLong);
 			plList.Add(maLong);
 			
 			vmaLong = new KTrendVMALong(){
 				StockId=item.StockId, StartDate=kdatas[vlStart].TxDate, EndDate=kdatas[kdatas.Count-1].TxDate,
-				StartValue=0, EndValue=0, TxDays = (kdatas.Count-1) - vlStart + 1, IncSpeed=0
+				StartValue=0, EndValue=0, TxDays = (kdatas.Count-1) - vlStart + 1, ChangeSpeed=0
 		    };
 			upTrend = kdatas[vlStart].Volume < kdatas[kdatas.Count-1].Volume;
 			max = upTrend ? kdatas[kdatas.Count-1].Volume : kdatas[vlStart].Volume;
 			min = upTrend ? kdatas[vlStart].Volume : kdatas[kdatas.Count-1].Volume;
 			days=(kdatas.Count-1) - vlStart + 1;
 			for(int j=vlStart; j<=kdatas.Count-1; j++){
-				if(kdatas[j].IsAllDayOnLimitedPrice()){
+				if(kdatas[j].IsAllDayOnFusingPrice()){
 					days--;
 					continue;
 				}
@@ -187,9 +187,9 @@ namespace Pandora.Invest.DataCapture
                 bool findMax = true, leftFirst = true;
                 if (ma[i].Id <= 0 && ma[i + 1].Id <= 0){
                     //当前区间、下一区间都属于长期趋势中的区间
-                    findMax = this.FindKData(w, ma[i].StartDate).MACusLong < this.FindKData(w, ma[i].EndDate).MACusLong;
+                    findMax = this.FindKData(w, ma[i].StartDate).MALong < this.FindKData(w, ma[i].EndDate).MALong;
                     //优先查找涨速较快的一侧
-                    leftFirst = Math.Abs(ma[i].IncSpeed) > Math.Abs(ma[i + 1].IncSpeed);
+                    leftFirst = Math.Abs(ma[i].ChangeSpeed) > Math.Abs(ma[i + 1].ChangeSpeed);
                     this.ReviseVertexPosition(ma[i], ma[i + 1], findMax, leftFirst, k, w);
                     i++;
                     continue;
@@ -208,8 +208,8 @@ namespace Pandora.Invest.DataCapture
                     leftFirst = true;
                     this.ReviseVertexPosition(ma[i], ma[i + 1], findMax, leftFirst, k, w);
                     if (i + 2 < ma.Count && ma[i+2].Id<=0){
-                        findMax = this.FindKData(w, ma[i+2].StartDate).MACusLong < this.FindKData(w, ma[i+2].EndDate).MACusLong;
-                        leftFirst = Math.Abs(ma[i+1].IncSpeed) > Math.Abs(ma[i + 2].IncSpeed);
+                        findMax = this.FindKData(w, ma[i+2].StartDate).MALong < this.FindKData(w, ma[i+2].EndDate).MALong;
+                        leftFirst = Math.Abs(ma[i+1].ChangeSpeed) > Math.Abs(ma[i + 2].ChangeSpeed);
                         this.ReviseVertexPosition(ma[i+1], ma[i+2], findMax, leftFirst, k, w);
                     }
                     i += 2;
@@ -246,10 +246,10 @@ namespace Pandora.Invest.DataCapture
                     || k[index + j * dr].TxDate <= current.StartDate || k[index + j * dr].TxDate >= next.EndDate)
                     break; //越界
                 if (findMax){
-                    if (k[index + j * dr].PriceClose > k[match].PriceClose)
+                    if (k[index + j * dr].ClosePrice > k[match].ClosePrice)
                         match = index + j * dr;
                 } else{
-                    if (k[index + j * dr].PriceClose < k[match].PriceClose)
+                    if (k[index + j * dr].ClosePrice < k[match].ClosePrice)
                         match = index + j * dr;
                 }
             }
@@ -260,24 +260,24 @@ namespace Pandora.Invest.DataCapture
                     || k[index + j * dr].TxDate <= current.StartDate || k[index + j * dr].TxDate >= next.EndDate)
                     break; //越界
                 if (findMax){
-                    if (k[index + j * dr].PriceClose > k[match].PriceClose * (1 + IgnoreRate))
+                    if (k[index + j * dr].ClosePrice > k[match].ClosePrice * (1 + IgnoreRate))
                         match = index + j * dr;
                 } else{
-                    if (k[index + j * dr].PriceClose < k[match].PriceClose * (1 - IgnoreRate))
+                    if (k[index + j * dr].ClosePrice < k[match].ClosePrice * (1 - IgnoreRate))
                         match = index + j * dr;
                 }
             }
             //fix vertex position
             if (match != index){
-                Info("[move-vertex] [" + k[index].TxDate.ToString("yyMMdd") + " " + k[index].PriceClose.ToString("f2")
-                    + "] -> [" + k[match].TxDate.ToString("yyMMdd") + " " + k[match].PriceClose.ToString("f2") + "]");
+                Info("[move-vertex] [" + k[index].TxDate.ToString("yyMMdd") + " " + k[index].ClosePrice.ToString("f2")
+                    + "] -> [" + k[match].TxDate.ToString("yyMMdd") + " " + k[match].ClosePrice.ToString("f2") + "]");
                 current.EndDate = k[match].TxDate;
-                current.EndValue = k[match].PriceClose;
+                current.EndValue = k[match].ClosePrice;
                 current.TxDays = this.FindTxDays(w, current.StartDate, current.EndDate);
                 this.CalcIncSpeed(current);
 
                 next.StartDate = k[match].TxDate;
-                next.StartValue = k[match].PriceClose;
+                next.StartValue = k[match].ClosePrice;
                 next.TxDays = this.FindTxDays(w, next.StartDate, next.EndDate);
                 this.CalcIncSpeed(next);
             }
@@ -295,7 +295,7 @@ namespace Pandora.Invest.DataCapture
             for(int i=0; i<listShort.Count; i++){
                 KTrendMAShort es = listShort[i];
                 if (Math.Abs((es.EndValue - es.StartValue) / es.StartValue) > StrongMotionRateThreshold 
-                    && es.IncSpeed >= StrongMotionSpeedThreshold){
+                    && es.ChangeSpeed >= StrongMotionSpeedThreshold){
 //                    if(DebugEnabled)
 //                        Debug("[Strong-Motion] [" + es.StartDate.ToString("yyMMdd") + "->" + es.EndDate.ToString("yyMMdd")+
 //                            " " + es.TxDays + " days] [AM:" + ((es.EndValue - es.StartValue) / es.StartValue * 100).ToString("f2") + 
@@ -361,7 +361,7 @@ namespace Pandora.Invest.DataCapture
                     }else {
                         decimal amContainer = (containing.EndValue - containing.StartValue) / containing.StartValue;
                         decimal amES = (es.EndValue - es.StartValue) / es.StartValue;
-                        if (amES / amContainer > ShortVsLongMotionRatio && es.IncSpeed / containing.IncSpeed > ShortVsLongSpeedRatio){
+                        if (amES / amContainer > ShortVsLongMotionRatio && es.ChangeSpeed / containing.ChangeSpeed > ShortVsLongSpeedRatio){
                             strongMotions.Add(es);
 //                            if (DebugEnabled)
 //                                Debug("   [OK] Container found, [FR:" + (amES / amContainer * 100).ToString("f2") + "%, "
@@ -395,7 +395,7 @@ namespace Pandora.Invest.DataCapture
                         StartDate = listLong[i].StartDate,
                         StartValue = listLong[i].StartValue,
                         EndDate = strongMotions[0].StartDate,
-                        EndValue = this.FindKData(wrappers, strongMotions[0].StartDate).PriceClose,
+                        EndValue = this.FindKData(wrappers, strongMotions[0].StartDate).ClosePrice,
                         TxDays = this.FindTxDays(wrappers, listLong[i].StartDate, strongMotions[0].StartDate)
                     };
                     this.CalcIncSpeed(malong);
@@ -410,16 +410,16 @@ namespace Pandora.Invest.DataCapture
                     Id = 99,
                     StockId = strongMotions[0].StockId,
                     StartDate = strongMotions[0].StartDate,
-                    StartValue = this.FindKData(wrappers, strongMotions[0].StartDate).PriceClose,
+                    StartValue = this.FindKData(wrappers, strongMotions[0].StartDate).ClosePrice,
                     EndDate = strongMotions[0].EndDate,
-                    EndValue = this.FindKData(wrappers, strongMotions[0].EndDate).PriceClose,
+                    EndValue = this.FindKData(wrappers, strongMotions[0].EndDate).ClosePrice,
                     TxDays = this.FindTxDays(wrappers, strongMotions[0].StartDate, strongMotions[0].EndDate)
                 };
                 this.CalcIncSpeed(malong);
                 Info("[strong-motion] [" + malong.StartDate.ToString("yyMMdd") 
                     + " > " + malong.EndDate.ToString("yyMMdd") + " " + malong.TxDays + " days] [AM:" 
                     + ((malong.EndValue - malong.StartValue) / malong.StartValue * 100).ToString("f2") + "] [speed:" 
-                    + malong.IncSpeed.ToString("f2") + "]");
+                    + malong.ChangeSpeed.ToString("f2") + "]");
                 result.Add(malong);
                 if (listLong[i].StartDate < malong.EndDate){
                     listLong[i].StartDate = malong.EndDate;

@@ -27,15 +27,15 @@ namespace Pandora.Invest.Html
                 ChartKJapaneseJSON jsonObj = new ChartKJapaneseJSON()
                 {
                     d = int.Parse(d.TxDate.ToString("yyyyMMdd")),
-                    o = d.PriceOpen,
-                    c = d.PriceClose,
-                    mi = d.PriceMin,
-                    ma = d.PriceMax,
-                    ms = d.MACusShort,
-                    ml = d.MACusLong,
+                    o = d.OpenPrice,
+                    c = d.ClosePrice,
+                    hi = d.HighPrice,
+                    lo = d.LowPrice,
+                    ms = d.MAShort,
+                    ml = d.MALong,
                     vol = d.Volume,
-                    vs = d.VMACusShort,
-                    vl = d.VMACusLong,
+                    vs = d.VMAShort,
+                    vl = d.VMALong,
                     vt = 0, vtr = 0, vts = 0, ds = 0
                 };
                 if (vertexes.ContainsKey(int.Parse(d.TxDate.ToString("yyyyMMdd")))){
@@ -44,7 +44,7 @@ namespace Pandora.Invest.Html
                         jsonObj.vt = 1;
                         jsonObj.ds = malong.TxDays;
                         jsonObj.vtr = decimal.Parse(((malong.EndValue - malong.StartValue) / malong.StartValue * 100).ToString("f1"));
-                        jsonObj.vts = malong.IncSpeed;
+                        jsonObj.vts = malong.ChangeSpeed;
                     }
                 }
                 json.Add(jsonObj);
@@ -64,19 +64,21 @@ namespace Pandora.Invest.Html
 	}
 
     public class ChartKJapaneseJSON{
-        public int d { get; set; } //date
+        public int d { get; set; } //date (yyyyMMdd)
+        public decimal nc { get; set; } //涨跌幅 net change
         public decimal o { get; set; } //open price
         public decimal c { get; set; } //close price
-        public decimal mi { get; set; } //min price
-        public decimal ma { get; set; } //max price
-        public decimal ms { get; set; } //MA short
-        public decimal ml { get; set; } //MA long
-        public long vol { get; set; } //volume
-        public long vs { get; set; } //VMA short
-        public long vl { get; set; } //VMA long
-        public int vt { get; set; } //is vertex
-        public decimal vtr { get; set; } //fluctuation rate of the long-term trend
-        public decimal vts { get; set; } //fluctuation speed of the long-term trend
-        public int ds { get; set; } //transaction days in the long-term trend
+        public decimal hi { get; set; } //high price
+        public decimal lo { get; set; } //low price
+        public decimal ms { get; set; } //短期均价 MA short
+        public decimal ml { get; set; } //长期均价MA long
+        public long vol { get; set; } //成交量 volume
+        public decimal er { get; set; } //换手率 exchange rate
+        public long vs { get; set; } //短期均量 VMA short
+        public long vl { get; set; } //长期均量 VMA long
+        public int vt { get; set; } //是否趋势顶点
+        public decimal vtr { get; set; } //趋势区间内涨跌幅（仅趋势顶点有值）
+        public decimal vts { get; set; } //趋势区间涨跌速度（仅趋势顶点有值）
+        public int ds { get; set; } //趋势区间内交易日天数
     }
 }

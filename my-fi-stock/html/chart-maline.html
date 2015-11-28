@@ -60,15 +60,15 @@ require(
     	var xaxis=[], k=[], macs=[], macl=[], vol=[], vmacs=[], vmacl=[], trend=[], min=9999, max=0;
     	for(var i=0; klist && i<klist.length; i++){
     		xaxis.push(klist[i].d);
-    		k.push( [ klist[i].o, klist[i].c, klist[i].mi, klist[i].ma ] );
+    		k.push( [ klist[i].o, klist[i].c, klist[i].lo, klist[i].hi ] );
     		macs.push(klist[i].ms);
     		macl.push(klist[i].ml);
     		vol.push(klist[i].vol);
     		vmacs.push(klist[i].vs);
     		vmacl.push(klist[i].vl);
     		trend.push(klist[i].vt ? klist[i].c : '-');
-			if(klist[i].mi<min) min=klist[i].mi;
-			if(klist[i].ma>max) max=klist[i].ma;
+			if(klist[i].lo<min) min=klist[i].lo;
+			if(klist[i].hi>max) max=klist[i].hi;
     	}
     	min = Math.floor(min);
     	max = Math.ceil(max);

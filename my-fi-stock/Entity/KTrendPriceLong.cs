@@ -19,7 +19,7 @@ namespace Pandora.Invest.Entity
             this.EndDate = trend.EndDate;
             this.EndValue = trend.EndValue;
             this.TxDays = trend.TxDays;
-            this.IncSpeed = trend.IncSpeed;
+            this.ChangeSpeed = trend.ChangeSpeed;
         }
 		
 		public static int BatchImport(Database db, List<KTrendMALong> entities){

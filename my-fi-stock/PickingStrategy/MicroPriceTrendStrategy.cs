@@ -56,10 +56,10 @@ namespace Pandora.Invest.PickingStrategy
 				this.MatchedCount++;
 				if(this.EndIndex<0) this.EndIndex = index;
 				this.StartIndex = index;
-				if(this.MinClose<=0) this.MinClose = this.MaxClose = kdata.PriceClose;
+				if(this.MinClose<=0) this.MinClose = this.MaxClose = kdata.ClosePrice;
 				else{
-					if(this.MinClose>kdata.PriceClose) this.MinClose = kdata.PriceClose;
-					if(this.MaxClose<kdata.PriceClose) this.MaxClose = kdata.PriceClose;
+					if(this.MinClose>kdata.ClosePrice) this.MinClose = kdata.ClosePrice;
+					if(this.MaxClose<kdata.ClosePrice) this.MaxClose = kdata.ClosePrice;
 				}
 			}
 			
@@ -92,15 +92,15 @@ namespace Pandora.Invest.PickingStrategy
 			MatchingState state = new MatchingState();
 			for(int i=kdatas.Count-1; i>0; i--){
 				//价格为0无法计算，退出
-				if(kdatas[i].PriceOpen==0 || kdatas[i].PriceMin==0 || kdatas[i].PriceClose==0) {
+				if(kdatas[i].OpenPrice==0 || kdatas[i].LowPrice==0 || kdatas[i].ClosePrice==0) {
 					log.Info(sto.StockCode + ": on " + kdatas[i].TxDate.ToString("yyyyMMdd") 
-					         + "(open=" + kdatas[i].PriceOpen.ToString("f2") + ", max=" + kdatas[i].PriceMax.ToString("f2")
-					         + ", min=" + kdatas[i].PriceMin.ToString("f2") + ", close=" + kdatas[i].PriceClose.ToString("f2")
-					         + ", prev=" + kdatas[i].PricePrev.ToString("f2") + "), can't apply CrossStartLineStrategy");
+					         + "(open=" + kdatas[i].OpenPrice.ToString("f2") + ", max=" + kdatas[i].HighPrice.ToString("f2")
+					         + ", min=" + kdatas[i].LowPrice.ToString("f2") + ", close=" + kdatas[i].ClosePrice.ToString("f2")
+					         + ", prev=" + kdatas[i].PrevPrice.ToString("f2") + "), can't apply CrossStartLineStrategy");
 					break; 
 				}
 				if(amOpenClose>0){ //开盘、收盘价振幅条件
-					value1 = (kdatas[i].PriceClose - kdatas[i].PriceOpen) / kdatas[i].PriceOpen;
+					value1 = (kdatas[i].ClosePrice - kdatas[i].OpenPrice) / kdatas[i].OpenPrice;
 					if(Math.Abs(value1) > amOpenClose) { 
 						StopMatching(state, minMatchedDays); 
 						if( (kdatas.Count-1) - i + 1 >= startingPoint) break;
@@ -108,7 +108,7 @@ namespace Pandora.Invest.PickingStrategy
 					}
 				}
 				if(amMinMax>0){ //最高价、最低价振幅条件
-					value1 = (kdatas[i].PriceMax - kdatas[i].PriceMin) / kdatas[i].PriceMin;
+					value1 = (kdatas[i].HighPrice - kdatas[i].LowPrice) / kdatas[i].LowPrice;
 					if(value1 > amMinMax) { 
 						StopMatching(state, minMatchedDays); 
 						if( (kdatas.Count-1) - i + 1 >= startingPoint) break;
@@ -122,7 +122,7 @@ namespace Pandora.Invest.PickingStrategy
 				}
 				if(amPrev>0){ //相邻交易日收盘价振幅条件 
 					//因为执行到此，state.MatchedCount>0必然成立，因此可以确保kdatas[i+1]不会越界
-					value1 = (kdatas[i+1].PriceClose - kdatas[i].PriceClose) / kdatas[i].PriceClose;
+					value1 = (kdatas[i+1].ClosePrice - kdatas[i].ClosePrice) / kdatas[i].ClosePrice;
 					if(Math.Abs(value1) > amPrev){
 						//这里不符合条件，是指已匹配节点与当前节点相邻日期间振幅不满足条件，因此对已匹配节点进行截止操作
 						//而当前节点仍然是一个新的、有效的终止点
@@ -133,9 +133,9 @@ namespace Pandora.Invest.PickingStrategy
 					}
 				}
 				if(amMatchedDays>0) { //所有已匹配节点收盘价振幅条件
-					if(kdatas[i].PriceClose<state.MinClose || kdatas[i].PriceClose>state.MaxClose){
-						value1 = kdatas[i].PriceClose < state.MinClose ? kdatas[i].PriceClose : state.MinClose;
-						value2 = kdatas[i].PriceClose > state.MaxClose ? kdatas[i].PriceClose : state.MaxClose;
+					if(kdatas[i].ClosePrice<state.MinClose || kdatas[i].ClosePrice>state.MaxClose){
+						value1 = kdatas[i].ClosePrice < state.MinClose ? kdatas[i].ClosePrice : state.MinClose;
+						value2 = kdatas[i].ClosePrice > state.MaxClose ? kdatas[i].ClosePrice : state.MaxClose;
 						if( (value2 - value1) / value1 > amMatchedDays){
 							StopMatching(state, minMatchedDays); 
 							if( (kdatas.Count-1) - i + 1 >= startingPoint) break;
@@ -159,7 +159,7 @@ namespace Pandora.Invest.PickingStrategy
 						vol += kdatas[i].Volume;
 					}
 					KJapaneseData volTopData = base.FindKData(kdatas, vma.StartDate);
-					s.VolRatio = (vol / s.MatchedCount) / volTopData.VMACusShort;
+					s.VolRatio = (vol / s.MatchedCount) / volTopData.VMAShort;
 					s.VolPrevTopDate = volTopData.TxDate;
 				}
 				
@@ -169,13 +169,13 @@ namespace Pandora.Invest.PickingStrategy
 					if(mas!=null){
 						s.MAShortInc = mas.EndValue > mas.StartValue;
 						s.MAShortTopDate = mas.EndDate;
-						s.MAShortRatio = (base.FindKData(kdatas, mas.EndDate).MACusShort - kdatas[s.EndIndex].PriceClose) / kdatas[s.EndIndex].PriceClose;
+						s.MAShortRatio = (base.FindKData(kdatas, mas.EndDate).MAShort - kdatas[s.EndIndex].ClosePrice) / kdatas[s.EndIndex].ClosePrice;
 					}
 					KTrendMALong mal = base.FindMAData<KTrendMALong>(malList, kdatas[s.EndIndex].TxDate, true);
 					if(mal!=null){
 						s.MALongInc = mal.EndValue > mal.StartValue;
 						s.MALongTopDate = mal.EndDate;
-						s.MALongRatio = (base.FindKData(kdatas, mal.EndDate).MACusShort - kdatas[s.EndIndex].PriceClose) / kdatas[s.EndIndex].PriceClose;
+						s.MALongRatio = (base.FindKData(kdatas, mal.EndDate).MAShort - kdatas[s.EndIndex].ClosePrice) / kdatas[s.EndIndex].ClosePrice;
 					}
 				}
 			}
@@ -187,14 +187,14 @@ namespace Pandora.Invest.PickingStrategy
 				    StartDate = kdatas[s.StartIndex].TxDate,
 				    EndDate = kdatas[s.EndIndex].TxDate,
 				    TxDays = s.MatchedCount,
-				    VolDecrease = s.VolReduction,
-				    VolRatio = s.VolRatio,
+				    VolDec = s.VolReduction,
+				    VolNetChange = s.VolRatio,
 				    VolTopDate = s.VolPrevTopDate,
 				    MAShortInc = s.MAShortInc,
-				    MAShortIncRatio = s.MAShortRatio,
+				    MAShortNetChange = s.MAShortRatio,
 				    MAShortTopDate = s.MAShortTopDate,
 				    MALongInc = s.MALongInc,
-				    MALongIncRatio = s.MALongRatio,
+				    MALongNetChange = s.MALongRatio,
 				    MALongTopDate = s.MALongTopDate
 				});
 			}
