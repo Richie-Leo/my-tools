@@ -1,9 +1,8 @@
 ﻿<Properties StartupItem="my-fi-stock.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="html/HtmlChartGenerate.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="DataCapture/CalKtrendWorker.cs">
     <Files>
-      <File FileName="html/HtmlChartGenerate.cs" Line="12" Column="32" />
-      <File FileName="MainForm.cs" Line="12" Column="30" />
+      <File FileName="DataCapture/CalKtrendWorker.cs" Line="322" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

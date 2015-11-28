@@ -96,7 +96,7 @@ namespace Pandora.Invest.Entity
 		private class KTrendBulkInserter<T> : BulkInserter<T>{
 			public KTrendBulkInserter(Database db, string tableName, int batchSize) 
 				: base(db, tableName, new string[] {
-				       		Mapper.Id, Mapper.StockId, Mapper.StartDate, Mapper.EndDate,
+				       		Mapper.StockId, Mapper.StartDate, Mapper.EndDate,
 				       		Mapper.StartValue, Mapper.EndValue, Mapper.TxDays, Mapper.IncSpeed
 				       }, batchSize) {}
 			
@@ -104,7 +104,7 @@ namespace Pandora.Invest.Entity
 				KTrend e = obj as KTrend;
 				if(e == null) throw new EntityException("The type of obj is not KTrend");
 				base.Push(new object[] {
-				    e.Id, e.StockId, e.StartDate, e.EndDate,
+				    e.StockId, e.StartDate, e.EndDate,
 				    e.StartValue, e.EndValue, e.TxDays, e.IncSpeed
 				});
 				return this;

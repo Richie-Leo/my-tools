@@ -22,6 +22,7 @@ namespace Pandora.Invest.MThread
 		public List<T> Items { set{ this._items = value; } }
 		public ProgressStatus Status { set{ this._status = value; } }
 		public MThreadContext Context { set{ this._context = value; } }
+        private T _item;
 		
 		public void Start(){
 			DateTime start = DateTime.Now;
@@ -36,6 +37,7 @@ namespace Pandora.Invest.MThread
 			}
 			
 			foreach(T obj in this._items){
+                this._item = obj;
 				try{
 					this.Do(this._context, obj);
 				}catch(Exception ex){
@@ -45,6 +47,7 @@ namespace Pandora.Invest.MThread
 				if(this._status!=null) {
 					this._status.FinishOne();
 				}
+                this._item = default(T);
 			}
 			
 			try{
@@ -61,18 +64,20 @@ namespace Pandora.Invest.MThread
 		}
 		
 		protected void Info(string message){
-			log.Info("[" + this.LogPrefix + "-" + Thread.CurrentThread.Name + "][" 
-			         + DateTime.Now.ToString("mm:ss:fff") + "]> " + message);
+            log.Info("[" + this.LogPrefix + "-" + Thread.CurrentThread.Name + "][" + DateTime.Now.ToString("mm:ss:fff") + "]"
+                + (this._item == null ? "" : "[" + this._item.ToString() + "]") + "> " + message);
 		}
+
+        protected bool DebugEnabled { get { return log.IsDebugEnabled; } }
 		
 		protected void Debug(string message){
-			log.Debug("[" + this.LogPrefix + "-" + Thread.CurrentThread.Name + "][" 
-			         + DateTime.Now.ToString("mm:ss:fff") + "]> " + message);
+            log.Debug("[" + this.LogPrefix + "-" + Thread.CurrentThread.Name + "][" + DateTime.Now.ToString("mm:ss:fff") + "]"
+                + (this._item == null ? "" : "[" + this._item.ToString() + "]") + "> " + message);
 		}
 		
 		protected void Error(string message, Exception ex){
-			log.Error("[" + this.LogPrefix + "-" + Thread.CurrentThread.Name + "][" 
-			         + DateTime.Now.ToString("mm:ss:fff") + "]> " + message, ex);
+            log.Error("[" + this.LogPrefix + "-" + Thread.CurrentThread.Name + "][" + DateTime.Now.ToString("mm:ss:fff") + "]"
+                + (this._item == null ? "" : "[" + this._item.ToString() + "]") + "> " + message, ex);
 		}
 	}
 }

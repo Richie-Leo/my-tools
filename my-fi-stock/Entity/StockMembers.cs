@@ -27,6 +27,15 @@ namespace Pandora.Invest.Entity
 			if(ds==null || ds.Tables.Count<=0 || ds.Tables[0].Rows.Count<=0) return null;
 			return new Stock(ds.Tables[0].Rows[0]);
 		}
+
+        public static Stock Get(Database db, int id){
+            DataSet ds = db.ExecDataSet(
+                string.Format("select * from {0} where {1}=?id", Mapper.TableName, Mapper.StockId),
+                new string[]{"id"}, new object[]{ id }
+            );
+            if(ds==null || ds.Tables.Count<=0 || ds.Tables[0].Rows.Count<=0) return null;
+            return new Stock(ds.Tables[0].Rows[0]);
+        }
 		
 		public void UpdateName(Database db){
 			db.ExecNonQuery(

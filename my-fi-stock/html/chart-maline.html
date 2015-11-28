@@ -17,6 +17,42 @@
 <script type="text/javascript">
 require.config({ paths:{ echarts:'./echarts-2.2.7/js' } });
 
+function formatTips(params){
+	//鼠标移动到图表区的提示信息，params[0, 1 .. n] 对应 series[0, 1 .. n]
+	if(!params || params.length<=0) return '';
+	var res=params[0].name;
+	var maShort = 0, maLong = 0;
+	for(var i=0; i<params.length; i++){
+		if(params[i].seriesName=='K-Japanese'){
+			res += '<br/>  开盘:' + params[i].value[0] + '&nbsp;&nbsp;收盘:' + params[i].value[1];
+	        res += '<br/>  最低:' + params[i].value[2] + '&nbsp;&nbsp;最高:' + params[i].value[3];
+		}else if(params[i].seriesName=='Trend-Vertex'){
+			var d = parseInt(params[i].name);
+	    	for(var j=0; j<klist.length; j++){
+	    		if(klist[j].d == d){
+	    			if(klist[j].vtr==0 && klist[j].vts==0) break;
+	    			res += '<br />  <span style="color:yellow;">涨幅:' + klist[j].vtr 
+	    				+ '%&nbsp;&nbsp;涨速:' + klist[j].vts + '%&nbsp;&nbsp;' + klist[j].ds + '天</span>';
+	    			break;
+	    		}
+	    	}
+		}
+		else if(params[i].seriesName=='MA-Short')
+			maShort = params[i].value;
+		else if(params[i].seriesName=='MA-Long')
+			maLong = params[i].value;
+		else if(params[i].seriesName=='Volume')
+			res += '<br/>  成交量:' + Math.round(params[i].value/1000)/10 + '万';
+		else if(params[i].seriesName=='VMA-Short')
+			res += '<br/>  短　期:' + Math.round(params[i].value/1000)/10 + '万';
+		else if(params[i].seriesName=='VMA-Long')
+			res += '<br/>  长　期:' + Math.round(params[i].value/1000)/10 + '万';
+	}
+	if(maShort || maLong)
+		res += '<br/>  短期:' + maShort + '&nbsp;&nbsp;长期:' + maLong;
+	return res;
+}
+
 require(
     [ 'echarts', 'echarts/chart/line', 'echarts/chart/bar', 'echarts/chart/k' ],
     function(ec){
@@ -30,27 +66,23 @@ require(
     		vol.push(klist[i].vol);
     		vmacs.push(klist[i].vs);
     		vmacl.push(klist[i].vl);
-    		trend.push(klist[i].vt ? klist[i].ms : '-');
-			if(klist[i].min<min) min=klist[i].min;
-			if(klist[i].max>max) max=klist[i].max;
+    		trend.push(klist[i].vt ? klist[i].c : '-');
+			if(klist[i].mi<min) min=klist[i].mi;
+			if(klist[i].ma>max) max=klist[i].ma;
     	}
     	min = Math.floor(min);
     	max = Math.ceil(max);
 
     	var myChart = ec.init(document.getElementById('main'));
     	myChart.setOption({
+    		title:{ show:true, text:title, x:40, y:0}, animation:false,
+    		legend:{ data:['K-Japanese','MA-Short', 'MA-Long', 'Trend-Vertex'] }, //图例
 		    tooltip:{
-		        trigger:'axis', showDelay:0,
-		        formatter:function (params) {
-		        	//鼠标移动到图表区的提示信息，params[0, 1 .. n] 对应 series[0, 1 .. n]
-		            var res = params[0].name;
-		            res += '<br/>  开盘:' + params[0].value[0] + '&nbsp;&nbsp;收盘:' + params[0].value[1];
-		            res += '<br/>  最低:' + params[0].value[2] + '&nbsp;&nbsp;最高:' + params[0].value[3];
-		            res += '<br/>  短期:' + params[1].value + '&nbsp;&nbsp;长期:' + params[2].value;
-		            return res;
-		        }
+		        trigger:'axis', showDelay:5,
+		        axisPointer: { type:'cross', crossStyle:{ type:'dashed', width:1, color:'#555' } },
+		        formatter:formatTips,
+		        textStyle:{ fontSize:11 }, backgroundColor:'rgba(0,0,0,0.4)'
 		    },
-		    legend:{ data:['K-Japanese','macs', 'macl'] }, //图例
 		    toolbox:{ show:true, //右上角工具栏
 		        feature:{
 		            mark:{show:true}, //线条标记功能按钮
@@ -64,29 +96,27 @@ require(
 		    	type:'category', data:xaxis,
 		    	boundaryGap:[0,0], axisLine:{show:false}, axisTick:{onGap:false},splitLine:{show:false}
 		    }],
-		    yAxis:[{ type:'value', min:min, max:max,
+		    yAxis:[{ type:'value', //min:min, max:max,
 		    	axisLine:{show:false}, scale:true, splitArea:{show:true} }],
 		    series:[
-		    	{ name:'K-Japanese', type:'k', data:k },
-		        { name:'macs', type:'line', data:macs },
-		        { name:'macl', type:'line', data:macl },
-		        { name:'trend-zone', type:'scatter', data:trend }
+		    	{ name:'K-Japanese', type:'k', data:k, symbol:'none' },
+		        { name:'MA-Short', type:'line', data:macs, symbol:'none' },
+		        { name:'MA-Long', type:'line', data:macl, symbol:'none' },
+		        { name:'Trend-Vertex', type:'line', data:trend, symbol:'star', symbolSize:4, showAllSymbol:true,
+		        	itemStyle:{ normal: {color:'blue'}} }
 		    ]//series
 		});//myChart.setOption({
 
 		var myChart2 = ec.init(document.getElementById('main2'));
 		myChart2.setOption({
+			animation:false,
+			legend:{ data:['Volume','VMA-Short', 'VMA-Long'] },
 		    tooltip:{ 
-		    	trigger:'axis', showDelay:0,
-		    	formatter:function (params) {
-		            var res = params[0].name;
-		            res += '<br/>  成交量:' + Math.round(params[0].value/1000)/10 + '万';
-		            res += '<br/>  短　期:' + Math.round(params[1].value/1000)/10 + '万';
-		            res += '<br/>  长　期:' + Math.round(params[2].value/1000)/10 + '万';
-		            return res;
-		        }
-		    },
-		    legend:{ data:['Volume','vmacs', 'vmacl'] },
+		    	trigger:'axis', showDelay:5,
+		    	axisPointer: { type:'cross', crossStyle:{ type:'dashed', width:1, color:'#444' } },
+		    	formatter:formatTips,
+		    	textStyle:{ fontSize:11 }, backgroundColor:'rgba(0,0,0,0.4)'
+		    }, 
 		    toolbox:{
 		        y:-30, show:true, 
 		        feature:{
@@ -110,8 +140,8 @@ require(
 		    }],
 		    series:[
 		    	{ name:'Volume', type:'bar', symbol:'none', data:vol },
-		    	{ name:'vmacs', type:'line', symbol:'none', data:vmacs },
-		    	{ name:'vmacl', type:'line', symbol:'none', data:vmacl }
+		    	{ name:'VMA-Short', type:'line', symbol:'none', data:vmacs },
+		    	{ name:'VMA-Long', type:'line', symbol:'none', data:vmacl }
 		    ]
 		});//myChart2.setOption({
 
