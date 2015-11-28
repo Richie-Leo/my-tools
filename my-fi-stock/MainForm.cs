@@ -15,7 +15,7 @@ namespace Pandora.Invest
 {
 	public partial class MainForm : Form
 	{
-		private const int THREAD_COUNT = 4;
+		private const int THREAD_COUNT = 1;
 		
 		private ProgressController _progressController;
 		

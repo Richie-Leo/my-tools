@@ -60,7 +60,7 @@ namespace Pandora.Invest.Entity
 
         private decimal _changeSpeed;
         /// <summary>
-        /// 增长速度
+        /// 涨跌速度。例如：涨速为3.5%时，ChangeSpeed属性值为3.5，表示平均每个交易日上涨3.5%
         /// </summary>
         public decimal ChangeSpeed { 
             get{
