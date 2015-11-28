@@ -31,7 +31,7 @@ namespace Pandora.Invest.DataCapture
 		public override void Do(MThreadContext context, Stock item)
 		{
 			//TODO
-			if(item.StockId!=998) return;
+			//if(item.StockId!=998) return;
 
 			DateTime start = DateTime.Now;
 			IList<KJapaneseData> kdatas = KJapaneseData.FindAll(this._db, item.StockId);
