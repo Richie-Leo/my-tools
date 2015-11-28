@@ -19,37 +19,46 @@ require.config({ paths:{ echarts:'./echarts-2.2.7/js' } });
 
 function formatTips(params){
 	//鼠标移动到图表区的提示信息，params[0, 1 .. n] 对应 series[0, 1 .. n]
+	//注意：params中不包含隐藏不显示的系列，当前显示哪些系列才能从params中读取到哪些系列当前值
 	if(!params || params.length<=0) return '';
-	var res=params[0].name;
 	var maShort = 0, maLong = 0;
-	for(var i=0; i<params.length; i++){
-		if(params[i].seriesName=='K-Japanese'){
-			res += '<br/>  开盘:' + params[i].value[0] + '&nbsp;&nbsp;收盘:' + params[i].value[1];
-	        res += '<br/>  最低:' + params[i].value[2] + '&nbsp;&nbsp;最高:' + params[i].value[3];
-		}else if(params[i].seriesName=='Trend-Vertex'){
-			var d = parseInt(params[i].name);
-	    	for(var j=0; j<klist.length; j++){
-	    		if(klist[j].d == d){
-	    			if(klist[j].vtr==0 && klist[j].vts==0) break;
-	    			res += '<br />  <span style="color:yellow;">涨幅:' + klist[j].vtr 
-	    				+ '%&nbsp;&nbsp;涨速:' + klist[j].vts + '%&nbsp;&nbsp;' + klist[j].ds + '天</span>';
-	    			break;
-	    		}
-	    	}
+
+	var kdata = null;
+	var d = parseInt(params[0].name);
+	for(var i=0; i<klist.length; i++){
+		if(klist[i].d == d){
+			kdata = klist[i];
+			break;
 		}
-		else if(params[i].seriesName=='MA-Short')
-			maShort = params[i].value;
-		else if(params[i].seriesName=='MA-Long')
-			maLong = params[i].value;
-		else if(params[i].seriesName=='Volume')
-			res += '<br/>  成交量:' + Math.round(params[i].value/1000)/10 + '万';
-		else if(params[i].seriesName=='VMA-Short')
-			res += '<br/>  短　期:' + Math.round(params[i].value/1000)/10 + '万';
-		else if(params[i].seriesName=='VMA-Long')
-			res += '<br/>  长　期:' + Math.round(params[i].value/1000)/10 + '万';
 	}
-	if(maShort || maLong)
-		res += '<br/>  短期:' + maShort + '&nbsp;&nbsp;长期:' + maLong;
+
+	var serials = 0;
+	var name = params[0].seriesName;
+	if(name=='K-Japanese' || name=='Trend-Vertex' || name=='MA-Short' || name=='MA-Long') serials=1;
+	if(name=='Volume' || name=='VMA-Short' || name=='VMA-Long') serials=2;
+	if(serials!=1 && serials!=2) return '';
+
+	res = params[0].name;
+	var color = '#fff';
+	if(kdata.nc>0) color = 'yellow'; else if(kdata.nc<0) color = '#00ff00';
+	if(serials==1){
+		res += '<br/>  开盘:' + kdata.o + '&nbsp;&nbsp;收盘:' + kdata.c;
+		res += '<br/>  <span style="color:' + color + ';">涨幅:' 
+			+ kdata.nc + '%&nbsp;&nbsp;振幅:'
+			+ Math.round((kdata.hi-kdata.lo)/kdata.lo*10000)/100 + '%</span>';
+		//res += '<br/>  最低:' + kdata.lo + '&nbsp;&nbsp;最高:' + kdata.hi;
+		res += '<br/>  短期:' + kdata.ms + '&nbsp;&nbsp;长期:' + kdata.ml;
+		if(kdata.vt){
+			res += '<br />  <span style="color:yellow;">涨幅:' + kdata.vtr 
+				+ '%&nbsp;&nbsp;涨速:' + kdata.vts + '%&nbsp;&nbsp;' + kdata.ds + '天</span>';
+		}
+	}else{
+		res += '<br/>  换手率:<span style="color:yellow;">' + kdata.er + '%</span>';
+		res += '<br/>  成交量:' + Math.round(kdata.vol/1000)/10 + '万股' + 
+			'&nbsp;&nbsp;金额:' + Math.round(kdata.amt/1000000)/100 + '亿';
+		res += '<br/>  短　期:' + Math.round(kdata.vs/1000)/10 + '万股'
+			+ '&nbsp;&nbsp;长期:' + Math.round(kdata.vl/1000)/10 + '万股';
+	}
 	return res;
 }
 
@@ -81,7 +90,7 @@ require(
 		        trigger:'axis', showDelay:5,
 		        axisPointer: { type:'cross', crossStyle:{ type:'dashed', width:1, color:'#555' } },
 		        formatter:formatTips,
-		        textStyle:{ fontSize:11 }, backgroundColor:'rgba(0,0,0,0.4)'
+		        textStyle:{ fontSize:13 }, backgroundColor:'rgba(0,0,0,0.4)'
 		    },
 		    toolbox:{ show:true, //右上角工具栏
 		        feature:{
@@ -115,7 +124,7 @@ require(
 		    	trigger:'axis', showDelay:5,
 		    	axisPointer: { type:'cross', crossStyle:{ type:'dashed', width:1, color:'#444' } },
 		    	formatter:formatTips,
-		    	textStyle:{ fontSize:11 }, backgroundColor:'rgba(0,0,0,0.4)'
+		    	textStyle:{ fontSize:13 }, backgroundColor:'rgba(0,0,0,0.4)'
 		    }, 
 		    toolbox:{
 		        y:-30, show:true, 

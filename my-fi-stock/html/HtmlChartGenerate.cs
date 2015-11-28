@@ -11,6 +11,7 @@ namespace Pandora.Invest.Html
 {
 	public class HtmlChartGenerate{
 		public static void GenerateMALineChart(Database db, int stockId, DateTime start, DateTime end){
+            Stock stock = Stock.Get(db, stockId);
 			IList<KJapaneseData> kdatas = KJapaneseData.Find (db, stockId, start, end);
             IDictionary<int, KTrendMALong> vertexes = new Dictionary<int, KTrendMALong>();
             IList<KTrendMALong> listLong = KTrendMALong.FindAll(db, stockId);
@@ -27,13 +28,17 @@ namespace Pandora.Invest.Html
                 ChartKJapaneseJSON jsonObj = new ChartKJapaneseJSON()
                 {
                     d = int.Parse(d.TxDate.ToString("yyyyMMdd")),
+                    nc = Convert.ToDecimal(((d.ClosePrice - d.PrevPrice) / d.PrevPrice * 100).ToString("f2")),
                     o = d.OpenPrice,
                     c = d.ClosePrice,
                     hi = d.HighPrice,
                     lo = d.LowPrice,
+                    vol = d.Volume,
+                    amt = d.Amount,
+                    er = stock.CirculatingCapital <= 0 ? 0 
+                        : Convert.ToDecimal((d.Volume * 1.0 / stock.CirculatingCapital * 100).ToString("f2")),
                     ms = d.MAShort,
                     ml = d.MALong,
-                    vol = d.Volume,
                     vs = d.VMAShort,
                     vl = d.VMALong,
                     vt = 0, vtr = 0, vts = 0, ds = 0
@@ -49,8 +54,7 @@ namespace Pandora.Invest.Html
                 }
                 json.Add(jsonObj);
 			}
-
-            Stock stock = Stock.Get(db, stockId);
+                
             string title = stock.StockCode + " " + stock.StockName 
                 + " (" + start.ToString("yyMMdd") + "-" + end.ToString("yyMMdd") + ")";
 
@@ -70,10 +74,11 @@ namespace Pandora.Invest.Html
         public decimal c { get; set; } //close price
         public decimal hi { get; set; } //high price
         public decimal lo { get; set; } //low price
+        public long vol { get; set; } //当日成交量 volume
+        public long amt { get; set; } //当日成交金额 amount
+        public decimal er { get; set; } //当日换手率 exchange rate
         public decimal ms { get; set; } //短期均价 MA short
-        public decimal ml { get; set; } //长期均价MA long
-        public long vol { get; set; } //成交量 volume
-        public decimal er { get; set; } //换手率 exchange rate
+        public decimal ml { get; set; } //长期均价 MA long
         public long vs { get; set; } //短期均量 VMA short
         public long vl { get; set; } //长期均量 VMA long
         public int vt { get; set; } //是否趋势顶点

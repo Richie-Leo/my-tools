@@ -50,12 +50,12 @@ namespace Pandora.Invest.Entity
 		public DateTime ListDate { get; set; }
 
 		/// <summary>
-		/// 总股本（单位万股）。
+		/// 总股本（单位股）。
 		/// </summary>
 		public long TotalCapital { get; set; }
 
 		/// <summary>
-		/// 流通股本（单位万股）。
+		/// 流通股本（单位股）。
 		/// </summary>
 		public long CirculatingCapital { get; set; }
 
