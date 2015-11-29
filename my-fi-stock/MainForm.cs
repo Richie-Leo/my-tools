@@ -28,7 +28,8 @@ namespace Pandora.Invest
 		}
 		void MainFormLoad(object sender, EventArgs e)
 		{
-			this.txtStartDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
+            this.txtStockCode.Text = "998";
+			this.txtStartDate.Text = "2013-01-01";
 			this.txtEndDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 			this._progressController = new ProgressController(
 				this.timer, this.progressBar, this.lblProgressTitle, this.lblProgressInfo, this.lblProgressRate);

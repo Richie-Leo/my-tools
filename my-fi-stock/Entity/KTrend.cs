@@ -104,6 +104,53 @@ namespace Pandora.Invest.Entity
         #endregion
 		
         #region 非自动生成代码
+        /// <summary>
+        /// 计算涨跌速度，计算好的速度设置在ChangeSpeed属性上。
+        /// 对下跌幅度计算方法进行了更改: 假设s为开始值，e为结束值，原本算法为 (e-s)/s*100%，修改后算法为 (s-e)/e*100%。
+        /// 目的: 修正原本算法下涨幅、跌幅的不公平性，例如经历涨幅100%再经历跌幅50%，已经回到原价，这样相同的涨跌幅就不具备比较性
+        /// </summary>
+        /// <param name="k">K线数据</param>
+        public static void CalChangeSpeed(KTrend k){
+            if (k.TxDays <= 1 || k.StartValue==0)
+                return;
+            int dr = k.StartValue < k.EndValue ? 1 : -1;
+            decimal lo = k.StartValue < k.EndValue ? k.StartValue : k.EndValue;
+            decimal hi = k.EndValue > k.StartValue ? k.EndValue : k.StartValue;
+            k.ChangeSpeed = Convert.ToDecimal(Math.Pow(Convert.ToDouble(hi / lo), Convert.ToDouble(1.0 / (k.TxDays - 1))) - 1) * 100 * dr;
+        }
+
+        /// <summary>
+        /// 计算涨跌幅。
+        /// 对下跌幅度计算方法进行了更改: 假设s为开始值，e为结束值，原本算法为 (e-s)/s*100%，修改后算法为 (s-e)/e*100%。
+        /// 目的: 修正原本算法下涨幅、跌幅的不公平性，例如经历涨幅100%再经历跌幅50%，已经回到原价，这样相同的涨跌幅就不具备比较性
+        /// </summary>
+        /// <returns>The net change.</returns>
+        /// <param name="s">S.</param>
+        /// <param name="e">E.</param>
+        public static decimal CalNetChange(decimal s, decimal e){
+            if (s == 0 || s == e)
+                return 0;
+            if (e > s)
+                return (e - s) / s;
+            return (s - e) / e * -1;
+        }
+
+        /// <summary>
+        /// 计算涨跌幅。
+        /// 对下跌幅度计算方法进行了更改: 假设s为开始值，e为结束值，原本算法为 (e-s)/s*100%，修改后算法为 (s-e)/e*100%。
+        /// 目的: 修正原本算法下涨幅、跌幅的不公平性，例如经历涨幅100%再经历跌幅50%，已经回到原价，这样相同的涨跌幅就不具备比较性
+        /// </summary>
+        /// <returns>The net change.</returns>
+        /// <param name="s">S.</param>
+        /// <param name="e">E.</param>
+        public static decimal CalNetChange(long s, long e){
+            if (s == 0 || s == e)
+                return 0;
+            if (e > s)
+                return (e - s) * 1.0m / s;
+            return (s - e) * 1.0m / e * -1;
+        }
+
 		protected static int BatchImport(Database db, string tableName, IList entities){
 			if(entities == null || entities.Count<=0) return 0;
 			int stockId = (entities[0] as KTrend).StockId;

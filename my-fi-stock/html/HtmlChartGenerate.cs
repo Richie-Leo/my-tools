@@ -12,44 +12,44 @@ namespace Pandora.Invest.Html
 	public class HtmlChartGenerate{
 		public static void GenerateMALineChart(Database db, int stockId, DateTime start, DateTime end){
             Stock stock = Stock.Get(db, stockId);
-			IList<KJapaneseData> kdatas = KJapaneseData.Find (db, stockId, start, end);
+            IList<KJapaneseData> lk = KJapaneseData.Find (db, stockId, start, end);
             IDictionary<int, KTrendMALong> vertexes = new Dictionary<int, KTrendMALong>();
-            IList<KTrendMALong> listLong = KTrendMALong.FindAll(db, stockId);
-            if (listLong.Count > 0){
-                vertexes.Add(int.Parse(listLong[0].StartDate.ToString("yyyyMMdd")), null);
-                for (int i = 0; i < listLong.Count; i++){
-                    int key = int.Parse(listLong[i].EndDate.ToString("yyyyMMdd"));
+            IList<KTrendMALong> lmal = KTrendMALong.FindAll(db, stockId);
+            if (lmal.Count > 0){
+                vertexes.Add(int.Parse(lmal[0].StartDate.ToString("yyyyMMdd")), null);
+                for (int i = 0; i < lmal.Count; i++){
+                    int key = int.Parse(lmal[i].EndDate.ToString("yyyyMMdd"));
                     if (!vertexes.ContainsKey(key))
-                        vertexes.Add(key, listLong[i]);
+                        vertexes.Add(key, lmal[i]);
                 }
             }
-            List<ChartKJapaneseJSON> json = new List<ChartKJapaneseJSON>(kdatas.Count);
-			foreach (KJapaneseData d in kdatas) {
+            List<ChartKJapaneseJSON> json = new List<ChartKJapaneseJSON>(lk.Count);
+            foreach (KJapaneseData k in lk) {
                 ChartKJapaneseJSON jsonObj = new ChartKJapaneseJSON()
                 {
-                    d = int.Parse(d.TxDate.ToString("yyyyMMdd")),
-                    nc = Convert.ToDecimal(((d.ClosePrice - d.PrevPrice) / d.PrevPrice * 100).ToString("f2")),
-                    o = d.OpenPrice,
-                    c = d.ClosePrice,
-                    hi = d.HighPrice,
-                    lo = d.LowPrice,
-                    vol = d.Volume,
-                    amt = d.Amount,
+                    d = int.Parse(k.TxDate.ToString("yyyyMMdd")),
+                    nc = Convert.ToDecimal((KTrend.CalNetChange(k.PrevPrice, k.ClosePrice) * 100).ToString("f2")),
+                    o = k.OpenPrice,
+                    c = k.ClosePrice,
+                    hi = k.HighPrice,
+                    lo = k.LowPrice,
+                    vol = k.Volume,
+                    amt = k.Amount,
                     er = stock.CirculatingCapital <= 0 ? 0 
-                        : Convert.ToDecimal((d.Volume * 1.0 / stock.CirculatingCapital * 100).ToString("f2")),
-                    ms = d.MAShort,
-                    ml = d.MALong,
-                    vs = d.VMAShort,
-                    vl = d.VMALong,
+                        : Convert.ToDecimal((k.Volume * 1.0 / stock.CirculatingCapital * 100).ToString("f2")),
+                    ms = k.MAShort,
+                    ml = k.MALong,
+                    vs = k.VMAShort,
+                    vl = k.VMALong,
                     vt = 0, vtr = 0, vts = 0, ds = 0
                 };
-                if (vertexes.ContainsKey(int.Parse(d.TxDate.ToString("yyyyMMdd")))){
-                    KTrendMALong malong = vertexes[int.Parse(d.TxDate.ToString("yyyyMMdd"))];
-                    if (malong != null){
+                if (vertexes.ContainsKey(int.Parse(k.TxDate.ToString("yyyyMMdd")))){
+                    KTrendMALong mal = vertexes[int.Parse(k.TxDate.ToString("yyyyMMdd"))];
+                    if (mal != null){
                         jsonObj.vt = 1;
-                        jsonObj.ds = malong.TxDays;
-                        jsonObj.vtr = decimal.Parse(((malong.EndValue - malong.StartValue) / malong.StartValue * 100).ToString("f1"));
-                        jsonObj.vts = malong.ChangeSpeed;
+                        jsonObj.ds = mal.TxDays;
+                        jsonObj.vtr = decimal.Parse((KTrend.CalNetChange(mal.StartValue, mal.EndValue) * 100).ToString("f1"));
+                        jsonObj.vts = mal.ChangeSpeed;
                     }
                 }
                 json.Add(jsonObj);
