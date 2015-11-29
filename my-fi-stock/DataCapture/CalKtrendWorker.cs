@@ -25,7 +25,7 @@ namespace Pandora.Invest.DataCapture
 		public override void Do(MThreadContext context, Stock item)
 		{
 			//TODO
-			if(item.StockId!=998) return;
+			//if(item.StockId!=998) return;
 
             //TODO: 增加趋势数据字段
             //    最高价、最低价、涨幅、振幅、生成步骤（记录合并、拆分等日志）

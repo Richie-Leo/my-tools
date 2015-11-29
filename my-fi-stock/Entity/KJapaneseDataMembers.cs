@@ -25,7 +25,7 @@ namespace Pandora.Invest.Entity
 			if(kdatas==null || kdatas.Count<=0) return 0;
 			try{
 				int stockId = kdatas[0].StockId;
-				if(stockId!=998) return 0; //TODO
+				//if(stockId!=998) return 0; //TODO
 				DateTime start = DateTime.Now;
 				//因为要计算250日均线，所以向前加载K线数据
 				List<KJapaneseData> latest = FindLatest(db, stockId, 251)as List<KJapaneseData>; 
