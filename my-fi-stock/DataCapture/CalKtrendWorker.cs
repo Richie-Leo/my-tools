@@ -40,6 +40,41 @@ namespace Pandora.Invest.DataCapture
             List<KTrendMALong> lmal = new List<KTrendMALong>();
             List<KTrendMAShort> lmas = new List<KTrendMAShort>();
             List<KTrendVMALong> lvmal = new List<KTrendVMALong>();
+
+            this.BuildIntervals(lmas, lmal, lvmal, item, lk, dw);
+            lmal = this.Split(lmal, dw, lmas);
+            this.ReviseVertexPosition(lmal, lk, dw);
+            this.Merge(lmal, dw);
+
+            DateTime caculated = DateTime.Now;
+			
+			KTrendMAShort.BatchImport(this._db, lmas);
+			KTrendMALong.BatchImport(this._db, lmal);
+			KTrendVMALong.BatchImport(this._db, lvmal);
+			
+			TimeSpan ts1 = loaded-start, ts2 = caculated-loaded, ts3 = DateTime.Now - caculated;
+			Info(item.StockCode + ", load:" + ts1.TotalMilliseconds.ToString("F0") 
+			    + ", caculate:" + ts2.TotalMilliseconds.ToString("F0")
+			    + ", insert:" + ts3.TotalMilliseconds.ToString("F0"));
+		}
+
+        public override void AfterDo(MThreadContext context)
+        {
+            this._db.Close();
+        }
+
+        #region BuildIntervals() 构建趋势区间
+        /// <summary>
+        /// 构建趋势区间，构建好的结果分别放在入参lmas、lmal、lvmal中
+        /// </summary>
+        /// <param name="lmas">输出：短期均价趋势区间</param>
+        /// <param name="lmal">输出：长期均价趋势区间</param>
+        /// <param name="lvmal">输出：长期均量趋势区间</param>
+        /// <param name="stock"></param>
+        /// <param name="lk">K线数据: 列表</param>
+        /// <param name="dw">K线数据: 字典</param>
+        private void BuildIntervals(List<KTrendMAShort> lmas, List<KTrendMALong> lmal, List<KTrendVMALong> lvmal
+            , Stock stock, IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dw){
             bool malFlag = lk[1].MALong>lk[0].MALong
                 , masFlag = lk[1].MAShort>lk[0].MAShort
                 , vmalFlag = lk[1].VMALong>lk[0].VMALong
@@ -54,13 +89,13 @@ namespace Pandora.Invest.DataCapture
                 if (lk[i].MAShort != lk[i - 1].MAShort){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
                     if ((lk[i].MAShort > lk[i - 1].MAShort) != masFlag){ //是否趋势转换节点
                         mas = new KTrendMAShort()
-                        {
-                            StockId = item.StockId, 
-                            StartDate = lk[masIndex].TxDate, EndDate = lk[i - 1].TxDate,
-                            StartValue = lk[masIndex].ClosePrice, EndValue = lk[i - 1].ClosePrice,
-                            TxDays = (i - 1) - masIndex + 1,
-                            ChangeSpeed = 0
-                        };
+                            {
+                                StockId = stock.StockId, 
+                                StartDate = lk[masIndex].TxDate, EndDate = lk[i - 1].TxDate,
+                                StartValue = lk[masIndex].ClosePrice, EndValue = lk[i - 1].ClosePrice,
+                                TxDays = (i - 1) - masIndex + 1,
+                                ChangeSpeed = 0
+                            };
                         this.CalcChangeSpeed(mas);
                         lmas.Add(mas);
                         masFlag = !masFlag;
@@ -72,13 +107,13 @@ namespace Pandora.Invest.DataCapture
                     if ((lk[i].MALong > lk[i - 1].MALong) != malFlag){ //是否趋势转换节点
                         //plStart：该趋势区间起始索引；i-1：该趋势区间截止索引
                         mal = new KTrendMALong()
-                        {
-                            StockId = item.StockId, 
-                            StartDate = lk[malIndex].TxDate, EndDate = lk[i - 1].TxDate,
-                            StartValue = lk[malIndex].ClosePrice, EndValue = lk[i - 1].ClosePrice,
-                            TxDays = (i - 1) - malIndex + 1,
-                            ChangeSpeed = 0 
-                        };
+                            {
+                                StockId = stock.StockId, 
+                                StartDate = lk[malIndex].TxDate, EndDate = lk[i - 1].TxDate,
+                                StartValue = lk[malIndex].ClosePrice, EndValue = lk[i - 1].ClosePrice,
+                                TxDays = (i - 1) - malIndex + 1,
+                                ChangeSpeed = 0 
+                            };
                         this.CalcChangeSpeed(mal);
                         lmal.Add(mal);
                         malFlag = !malFlag;
@@ -89,10 +124,10 @@ namespace Pandora.Invest.DataCapture
                 if (lk[i].VMALong != lk[i - 1].VMALong){ //成交量相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
                     if ((lk[i].VMALong > lk[i - 1].VMALong) != vmalFlag){ //是否趋势转换节点
                         vmal = new KTrendVMALong()
-                        {
-                            StockId = item.StockId, StartDate = lk[vmalIndex].TxDate, EndDate = lk[i - 1].TxDate,
-                            StartValue = 0, EndValue = 0, TxDays = (i - 1) - vmalIndex + 1, ChangeSpeed = 0
-                        };
+                            {
+                                StockId = stock.StockId, StartDate = lk[vmalIndex].TxDate, EndDate = lk[i - 1].TxDate,
+                                StartValue = 0, EndValue = 0, TxDays = (i - 1) - vmalIndex + 1, ChangeSpeed = 0
+                            };
                         rising = lk[vmalIndex].Volume < lk[i - 1].Volume;
                         hi = rising ? lk[i - 1].Volume : lk[vmalIndex].Volume;
                         lo = rising ? lk[vmalIndex].Volume : lk[i - 1].Volume;
@@ -118,34 +153,34 @@ namespace Pandora.Invest.DataCapture
                 }
             }
 
-			mas = new KTrendMAShort () {
-				StockId = item.StockId, StartDate = lk [masIndex].TxDate, EndDate = lk [lk.Count - 1].TxDate,
-				StartValue = lk [masIndex].ClosePrice, EndValue = lk [lk.Count - 1].ClosePrice,
-				TxDays = (lk.Count - 1) - masIndex + 1,
-				ChangeSpeed = 0
-			};
+            mas = new KTrendMAShort () {
+                StockId = stock.StockId, StartDate = lk [masIndex].TxDate, EndDate = lk [lk.Count - 1].TxDate,
+                StartValue = lk [masIndex].ClosePrice, EndValue = lk [lk.Count - 1].ClosePrice,
+                TxDays = (lk.Count - 1) - masIndex + 1,
+                ChangeSpeed = 0
+            };
             this.CalcChangeSpeed(mas);
-			lmas.Add(mas);
+            lmas.Add(mas);
 
-			mal = new KTrendMALong () {
-				StockId = item.StockId, 
+            mal = new KTrendMALong () {
+                StockId = stock.StockId, 
                 StartDate = lk [malIndex].TxDate, EndDate = lk [lk.Count - 1].TxDate,
                 StartValue = lk [malIndex].ClosePrice, EndValue = lk [lk.Count - 1].ClosePrice,
-				TxDays = (lk.Count - 1) - malIndex + 1,
-				ChangeSpeed = 0
-			};
-            this.CalcChangeSpeed(mal);
-			lmal.Add(mal);
-			
-            vmal = new KTrendVMALong()
-            {
-                StockId = item.StockId, StartDate = lk[vmalIndex].TxDate, EndDate = lk[lk.Count - 1].TxDate,
-                StartValue = 0, EndValue = 0, TxDays = (lk.Count - 1) - vmalIndex + 1, ChangeSpeed = 0
+                TxDays = (lk.Count - 1) - malIndex + 1,
+                ChangeSpeed = 0
             };
-			rising = lk[vmalIndex].Volume < lk[lk.Count-1].Volume;
-			hi = rising ? lk[lk.Count-1].Volume : lk[vmalIndex].Volume;
-			lo = rising ? lk[vmalIndex].Volume : lk[lk.Count-1].Volume;
-			days=(lk.Count-1) - vmalIndex + 1;
+            this.CalcChangeSpeed(mal);
+            lmal.Add(mal);
+
+            vmal = new KTrendVMALong()
+                {
+                    StockId = stock.StockId, StartDate = lk[vmalIndex].TxDate, EndDate = lk[lk.Count - 1].TxDate,
+                    StartValue = 0, EndValue = 0, TxDays = (lk.Count - 1) - vmalIndex + 1, ChangeSpeed = 0
+                };
+            rising = lk[vmalIndex].Volume < lk[lk.Count-1].Volume;
+            hi = rising ? lk[lk.Count-1].Volume : lk[vmalIndex].Volume;
+            lo = rising ? lk[vmalIndex].Volume : lk[lk.Count-1].Volume;
+            days=(lk.Count-1) - vmalIndex + 1;
             for (int j = vmalIndex; j <= lk.Count - 1; j++){
                 if (lk[j].IsAllDayOnFusingPrice()){
                     days--;
@@ -156,27 +191,20 @@ namespace Pandora.Invest.DataCapture
                 if (lk[j].Volume < lo)
                     lo = lk[j].Volume;
             }
-			vmal.StartValue = rising ? lo : hi;
-			vmal.EndValue = rising ? hi : lo;
-			vmal.TxDays = days <=0 ? (lk.Count-1) - vmalIndex + 1 : days;
+            vmal.StartValue = rising ? lo : hi;
+            vmal.EndValue = rising ? hi : lo;
+            vmal.TxDays = days <=0 ? (lk.Count-1) - vmalIndex + 1 : days;
             this.CalcChangeSpeed(vmal);
-			lvmal.Add(vmal);
-			DateTime caculated = DateTime.Now;
+            lvmal.Add(vmal);
+        }
+        #endregion
 
-            lmal = this.Split(lmal, dw, lmas);
-            this.ReviseVertexPosition(lmal, lk, dw);
-            this.Merge(lmal, dw);
-			
-			KTrendMAShort.BatchImport(this._db, lmas);
-			KTrendMALong.BatchImport(this._db, lmal);
-			KTrendVMALong.BatchImport(this._db, lvmal);
-			
-			TimeSpan ts1 = loaded-start, ts2 = caculated-loaded, ts3 = DateTime.Now - caculated;
-			Info(item.StockCode + ", load:" + ts1.TotalMilliseconds.ToString("F0") 
-			    + ", caculate:" + ts2.TotalMilliseconds.ToString("F0")
-			    + ", insert:" + ts3.TotalMilliseconds.ToString("F0"));
-		}
-
+        #region Merge() 区间合并 (长期价格趋势)
+        /// <summary>
+        /// 区间合并 (长期价格趋势)，直接修改入参lmal
+        /// </summary>
+        /// <param name="lmal">输入、输出：K线数据: 列表</param>
+        /// <param name="dw">K线数据: 字典</param>
         private void Merge(List<KTrendMALong> lmal, IDictionary<DateTime, KDataWrapper> dw){
             #region Fragment Merge: 合并时间跨度较小的区间
             int DaysForFragmentMerge = 5;
@@ -241,7 +269,15 @@ namespace Pandora.Invest.DataCapture
             #region Mixed Rise Merge: 合并震荡上行、下降的区间
             #endregion
         }
+        #endregion
 
+        #region ReviseVertexPosition() 修正区间顶点位置 (长期价格趋势) 
+        /// <summary>
+        /// 修正区间顶点位置 (长期价格趋势) ，直接修改入参lmal
+        /// </summary>
+        /// <param name="lmal">输入、输出：长期趋势区间</param>
+        /// <param name="lk">K线数据: 列表</param>
+        /// <param name="dw">K线数据: 字典</param>
         private void ReviseVertexPosition(List<KTrendMALong> lmal , IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dw){
             for (int i = 0; i < lmal.Count - 1;){ //对区间截止点进行调整，最后一个区间无需调整
                 bool findMax = true, leftFirst = true;
@@ -342,11 +378,13 @@ namespace Pandora.Invest.DataCapture
                 this.CalcChangeSpeed(next);
             }
         }
+        #endregion
 
+        #region Split() 拆分暴涨暴跌区间 (长期价格趋势)
         /// <summary>
-        /// 拆分暴涨暴跌区间
+        /// 拆分暴涨暴跌区间 (长期价格趋势)，返回拆分后的趋势区间
         /// </summary>
-        /// <returns>拆分后的长期趋势区间</returns>
+        /// <returns>拆分后的趋势区间</returns>
         /// <param name="lmal">长期趋势区间</param>
         /// <param name="dw">K线数据字典</param>
         /// <param name="lmas">短期趋势区间</param>
@@ -475,7 +513,9 @@ namespace Pandora.Invest.DataCapture
 
 			return result;
 		}
+        #endregion
 
+        #region 辅助方法
         /// <summary>
         /// 计算涨跌速度，计算好的速度设置在ChangeSpeed属性上
         /// </summary>
@@ -510,10 +550,6 @@ namespace Pandora.Invest.DataCapture
             public KJapaneseData KData { get; set; }
             public int Index { get; set; }
         }
-		
-		public override void AfterDo(MThreadContext context)
-		{
-			this._db.Close();
-		}
+        #endregion
 	}
 }
