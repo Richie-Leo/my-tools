@@ -84,7 +84,7 @@ namespace Pandora.Invest.Entity
             get { return this._remark; } 
             set{
                 this._remark = value;
-                if (!string.IsNullOrEmpty(this._remark))
+                if (!string.IsNullOrEmpty(this._remark) && this._remark.Length>200)
                     this._remark = this._remark.Substring(0, 200);
             } 
         }
@@ -93,13 +93,24 @@ namespace Pandora.Invest.Entity
         /// <summary>
         /// 区间涨幅。
         /// </summary>
-        public decimal NetChange { get { return this._netChange; } set { this._netChange = Convert.ToDecimal(value.ToString("F4")); } }
+        public decimal NetChange { get { return this._netChange; } 
+        	set { 
+        		this._netChange = Convert.ToDecimal(value.ToString("F4"));
+        		if(this._netChange>999) this._netChange = 999;        	
+        	} 
+        }
 
         private decimal _amplitude;
         /// <summary>
         /// 区间振幅。
         /// </summary>
-        public decimal Amplitude { get {return this._amplitude;} set{this._amplitude=Convert.ToDecimal(value.ToString("F4"));} }
+        public decimal Amplitude { get {return this._amplitude;} 
+        	set{
+        		this._amplitude=Convert.ToDecimal(value.ToString("F4"));
+        		if(this._amplitude>999)
+        			this._amplitude = 999;
+        	}
+        }
 
         private decimal _changeSpeed;
         /// <summary>
@@ -111,6 +122,7 @@ namespace Pandora.Invest.Entity
             }
             set{
                 this._changeSpeed = Convert.ToDecimal(value.ToString("F4"));
+                if(this._changeSpeed>999) this._changeSpeed = 999;
             }
         }
 

@@ -66,7 +66,7 @@ namespace Pandora.Invest.DataCapture
             this._db.Close();
         }
 
-        #region BuildIntervals() 构建趋势区间
+        #region BuildKTrend() 构建趋势区间
         /// <summary>
         /// 构建趋势区间，构建好的结果分别放在入参lmas、lmal、lvmal中
         /// </summary>
@@ -129,7 +129,7 @@ namespace Pandora.Invest.DataCapture
             try{
                 result = (T)Activator.CreateInstance(typeof(T));
             }catch(Exception ex){
-                base.Error("无法创建" + typeof(T).GetType().Name, ex);
+                base.Error("无法创建" + typeof(T).Name, ex);
                 return default(T);
             }
             trend = (KTrend)result;
@@ -154,7 +154,8 @@ namespace Pandora.Invest.DataCapture
                     break;
             }
 
-            KTrend.CalHighLowValue(trend, MAType.MAShort, lk, start, end);
+            trend.NetChange = KTrend.CalNetChange(trend.StartValue, trend.EndValue);
+            KTrend.CalHighLowValue(trend, type, lk, start, end);
             KTrend.CalChangeSpeed(trend);
 
             return trend as T;
@@ -172,26 +173,20 @@ namespace Pandora.Invest.DataCapture
             int DaysForFragmentMerge = 5;
             decimal NCForFragmentMerge = 0.05m;
             for (int i = 0; i < lmal.Count; ){
-                if (lmal[i].TxDays > DaysForFragmentMerge){
+                if (lmal[i].TxDays > DaysForFragmentMerge || Math.Abs(lmal[i].NetChange) > NCForFragmentMerge){
                     i++;
                     continue; //不满足合并条件，继续
                 }
-//                decimal malStart = this.FindKData(dw, lmal[i].StartDate).MALong;
-//                decimal malEnd = this.FindKData(dw, lmal[i].EndDate).MALong;
-                if(Math.Abs(KTrend.CalNetChange(lmal[i].StartValue, lmal[i].EndValue)) > NCForFragmentMerge){ // ((malEnd - malStart) / malStart > NCForFragmentMerge){
-                    i++;
-                    continue; //不满足合并条件，继续
-                }
-                //满足合并条件，判断向前还是向后合并:
-                //1.禁止向拆分区间合并;
-                //2.前区间和后区间方向相反，则将待合并区间向同向区间合并;
-                //3.前区间和后区间方向相同，则将待合并区间向涨速较慢的区间合并;
+            	//满足合并条件，判断向前还是向后合并:
                 int direction = 0; //-1:向前合并；1:向后合并
-                if (i == 0)
+                if (i == 0) //第一个区间，只能向后合并
                     direction = 1;
-                else if (i == dw.Count - 1)
+                else if (i == lmal.Count - 1) //最后一个区间，只能向前合并
                     direction = -1;
-                else{
+                else{ //不是第一个、最后一个区间，则：
+                	//1.禁止向拆分区间合并;
+	                //2.前区间和后区间方向相反，则将待合并区间向同向区间合并;
+	                //3.前区间和后区间方向相同，则将待合并区间向涨速较慢的区间合并;
                     if(lmal[i-1].Id>0) direction = 1;
                     else if(lmal[i+1].Id>0) direction = -1;
                     else{
@@ -204,25 +199,27 @@ namespace Pandora.Invest.DataCapture
                         }
                     }
                 }
-                if(direction>0 && lmal[i+1].Id<=0){
+                if(direction>0 && i+1<lmal.Count && lmal[i+1].Id<=0){
                     lmal[i].EndDate = lmal[i+1].EndDate;
                     lmal[i].EndValue = lmal[i+1].EndValue;
                     lmal[i].TxDays = this.FindTxDays(dw, lmal[i].StartDate, lmal[i].EndDate);
                     lmal[i].HighValue = lmal[i].HighValue > lmal[i+1].HighValue ? lmal[i].HighValue : lmal[i+1].HighValue;
                     lmal[i].LowValue = lmal[i].LowValue < lmal[i+1].LowValue ? lmal[i].LowValue : lmal[i+1].LowValue;
                     lmal[i].Amplitude = KTrend.CalNetChange(lmal[i].LowValue, lmal[i].HighValue);
+                    lmal[i].NetChange = KTrend.CalNetChange(lmal[i].StartValue, lmal[i].EndValue);
                     KTrend.CalChangeSpeed(lmal[i]);
                     lmal[i].Remark += "; Merge(" + lmal[i+1].StartDate.ToString("yyyyMMdd") + "-" + lmal[i+1].EndDate.ToString("yyyyMMdd") + ")";
                     lmal.RemoveAt(i+1);
                     //合并之后不改变索引值，下次循环继续判断合并后的区间是否仍满足合并条件
                     continue;
-                }else if(direction<0 && lmal[i-1].Id<=0){
+                }else if(direction<0 && i>=1 && lmal[i-1].Id<=0){
                     lmal[i-1].EndDate = lmal[i].EndDate;
                     lmal[i-1].EndValue = lmal[i].EndValue;
                     lmal[i-1].TxDays = this.FindTxDays(dw, lmal[i-1].StartDate, lmal[i-1].EndDate);
                     lmal[i-1].HighValue = lmal[i-1].HighValue > lmal[i].HighValue ? lmal[i-1].HighValue : lmal[i].HighValue;
                     lmal[i-1].LowValue = lmal[i-1].LowValue < lmal[i].LowValue ? lmal[i-1].LowValue : lmal[i].LowValue;
                     lmal[i-1].Amplitude = KTrend.CalNetChange(lmal[i-1].LowValue, lmal[i-1].HighValue);
+                    lmal[i-1].NetChange = KTrend.CalNetChange(lmal[i-1].StartValue, lmal[i-1].EndValue);
                     KTrend.CalChangeSpeed(lmal[i-1]);
                     lmal[i-1].Remark += "; Merge(" + lmal[i].StartDate.ToString("yyyyMMdd") + "-" + lmal[i].EndDate.ToString("yyyyMMdd") + ")";
                     lmal.RemoveAt(i);
@@ -230,6 +227,7 @@ namespace Pandora.Invest.DataCapture
                     //将位置i移除后，原i+1变为i，因此不改变索引值继续判断位置i的区间
                     continue;
                 }
+                i++;
             }
             #endregion
 
@@ -341,11 +339,17 @@ namespace Pandora.Invest.DataCapture
                 cur.EndValue = lk[match].ClosePrice;
                 cur.TxDays = this.FindTxDays(dw, cur.StartDate, cur.EndDate);
                 KTrend.CalChangeSpeed(cur);
+                cur.NetChange = KTrend.CalNetChange(cur.StartValue, cur.EndValue);
+                KTrend.CalHighLowValue(cur, MAType.MALong, lk
+                                       , this.FindKWrapper(dw, cur.StartDate).Index, this.FindKWrapper(dw, cur.EndDate).Index);
 
                 next.StartDate = lk[match].TxDate;
                 next.StartValue = lk[match].ClosePrice;
                 next.TxDays = this.FindTxDays(dw, next.StartDate, next.EndDate);
                 KTrend.CalChangeSpeed(next);
+                next.NetChange = KTrend.CalNetChange(next.StartValue, next.EndValue);
+                KTrend.CalHighLowValue(next, MAType.MALong, lk
+                                       , this.FindKWrapper(dw, next.StartDate).Index, this.FindKWrapper(dw, next.EndDate).Index);
             }
         }
         #endregion
@@ -452,6 +456,7 @@ namespace Pandora.Invest.DataCapture
                     mal.Remark = lmal[i].Remark + "; Trunc(,<<" + lmal[i].EndDate.ToString("yyyyMMdd") + ")";
                     KTrend.CalChangeSpeed(mal);
                     KTrend.CalHighLowValue(mal, MAType.MALong, lk, this.FindKWrapper(dw, mal.StartDate).Index, this.FindKWrapper(dw, mal.EndDate).Index);
+                    mal.NetChange = KTrend.CalNetChange(mal.StartValue, mal.EndValue);
                     result.Add(mal);
                 }
                 if (lmal[i].EndDate < jumpAndCrash[0].EndDate){
@@ -471,6 +476,7 @@ namespace Pandora.Invest.DataCapture
                 mal.Remark = "MAS";
                 KTrend.CalChangeSpeed(mal);
                 KTrend.CalHighLowValue(mal, MAType.MALong, lk, this.FindKWrapper(dw, mal.StartDate).Index, this.FindKWrapper(dw, mal.EndDate).Index);
+                mal.NetChange = KTrend.CalNetChange(mal.StartValue, mal.EndValue);
                 Info("[strong-motion] [" + mal.StartDate.ToString("yyMMdd") 
                     + " > " + mal.EndDate.ToString("yyMMdd") + " " + mal.TxDays + " days] [AM:" 
                     + (KTrend.CalNetChange(mal.StartValue, mal.EndValue) * 100).ToString("f2") + "] [speed:" 
@@ -483,6 +489,7 @@ namespace Pandora.Invest.DataCapture
                     lmal[i].TxDays = this.FindTxDays(dw, lmal[i].StartDate, lmal[i].EndDate);
                     KTrend.CalChangeSpeed(lmal[i]);
                     KTrend.CalHighLowValue(lmal[i], MAType.MALong, lk, this.FindKWrapper(dw, lmal[i].StartDate).Index, this.FindKWrapper(dw, lmal[i].EndDate).Index);
+                    lmal[i].NetChange = KTrend.CalNetChange(lmal[i].StartValue, lmal[i].EndValue);
                 }
                 jumpAndCrash.RemoveAt(0);
             }
