@@ -117,6 +117,8 @@
     <Compile Include="MThread\MThreadManager.cs" />
     <Compile Include="MThread\MThreadWorker.cs" />
     <Compile Include="MThread\MThreadContext.cs" />
+    <Compile Include="Entity\MAType.cs" />
+    <Compile Include="Entity\KTrendMembers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

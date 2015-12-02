@@ -146,8 +146,6 @@ namespace Pandora.Invest.Entity
 		}
 		
 		#region 计算定制化的均价、均量
-		enum MAType { MAShort = 1, MALong = 2, VMAShort = 3, VMALong = 4 }
-		
 		private static void CalculateMA(IList<KJapaneseData> impList, int impStart, int impEnd, MAType type){
 			//初始化参数
 			int n = 0, round = 0, weight = 0;

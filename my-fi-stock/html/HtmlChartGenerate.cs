@@ -9,10 +9,10 @@ using Newtonsoft.Json;
 
 namespace Pandora.Invest.Html
 {
-	public class HtmlChartGenerate{
-		public static void GenerateMALineChart(Database db, int stockId, DateTime start, DateTime end){
+    public class HtmlChartGenerate{
+        public static void GenerateMALineChart(Database db, int stockId, DateTime start, DateTime end){
             Stock stock = Stock.Get(db, stockId);
-            IList<KJapaneseData> lk = KJapaneseData.Find (db, stockId, start, end);
+            IList<KJapaneseData> lk = KJapaneseData.Find(db, stockId, start, end);
             IDictionary<int, KTrendMALong> vertexes = new Dictionary<int, KTrendMALong>();
             IList<KTrendMALong> lmal = KTrendMALong.FindAll(db, stockId);
             if (lmal.Count > 0){
@@ -24,14 +24,14 @@ namespace Pandora.Invest.Html
                 }
             }
             List<ChartKJapaneseJSON> json = new List<ChartKJapaneseJSON>(lk.Count);
-            foreach (KJapaneseData k in lk) {
+            foreach (KJapaneseData k in lk){
                 ChartKJapaneseJSON jsonObj = new ChartKJapaneseJSON()
                 {
                     d = int.Parse(k.TxDate.ToString("yyyyMMdd")),
                     nc = Convert.ToDecimal((KTrend.CalNetChange(k.PrevPrice, k.ClosePrice) * 100).ToString("f2")),
                     o = k.OpenPrice,
                     c = k.ClosePrice,
-                    hi = k.HighPrice,
+                    hi = k.HighPrice, 
                     lo = k.LowPrice,
                     vol = k.Volume,
                     amt = k.Amount,
@@ -53,19 +53,20 @@ namespace Pandora.Invest.Html
                     }
                 }
                 json.Add(jsonObj);
-			}
+            }
                 
-            string title = stock.StockCode + " " + stock.StockName 
-                + " (" + start.ToString("yyMMdd") + "-" + end.ToString("yyMMdd") + ")";
+            string title = stock.StockCode + " " + stock.StockName
+                           + " (" + start.ToString("yyMMdd") + "-" + end.ToString("yyMMdd") + ")";
 
-			string jsonString = JsonConvert.SerializeObject (json, Formatting.Indented);
-            string fileName = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar 
-                + "html" + Path.DirectorySeparatorChar + "chart-maline.json";
-			if(File.Exists(fileName)) File.Delete(fileName);
-			File.CreateText(fileName).Close();
+            string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
+            string fileName = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar
+                              + "html" + Path.DirectorySeparatorChar + "chart-maline.json";
+            if (File.Exists(fileName))
+                File.Delete(fileName);
+            File.CreateText(fileName).Close();
             File.WriteAllText(fileName, "var title='" + title + "'; \n var klist = " + jsonString + ";", Encoding.GetEncoding("utf-8"));
-		}
-	}
+        }
+    }
 
     public class ChartKJapaneseJSON{
         public int d { get; set; } //date (yyyyMMdd)
