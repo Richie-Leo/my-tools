@@ -79,7 +79,6 @@
     <Compile Include="Basis\DB\Database.cs" />
     <Compile Include="Basis\Utils\ConvertUtil.cs" />
     <Compile Include="DataCapture\CalKTrendWorker.cs" />
-    <Compile Include="DataCapture\Http\ImpStockBasicInfo.cs" />
     <Compile Include="Entity\EntityException.cs" />
     <Compile Include="Entity\KJapaneseData.cs" />
     <Compile Include="Entity\KJapaneseDataMembers.cs" />
@@ -120,6 +119,7 @@
     <Compile Include="Entity\KTrendMembers.cs" />
     <Compile Include="DataCapture\Http\ImpShareHoldersNumWorker.cs" />
     <Compile Include="Basis\Utils\HttpUtil.cs" />
+    <Compile Include="DataCapture\Http\ImpStockInfoWorker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
