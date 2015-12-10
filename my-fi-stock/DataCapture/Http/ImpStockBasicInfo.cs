@@ -19,7 +19,7 @@ namespace Pandora.Invest.DataCapture.Http
 	/// </summary>
 	public class ImpStockBasicInfo
 	{
-		private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ImpShareholdersNum));
+        private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ImpStockBasicInfo));
 		private const string PREFIX = "[http] [basic-info] [";
 		
 		private const string URL = "http://gu.qq.com/{0}{1}";

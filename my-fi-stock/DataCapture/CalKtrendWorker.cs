@@ -25,10 +25,12 @@ namespace Pandora.Invest.DataCapture
 		public override void Do(MThreadContext context, Stock item)
 		{
 			//TODO
-			//if(item.StockId!=998) return;
+			if(item.StockId!=600621) return;
 
-            //TODO: 增加趋势数据字段
-            //    最高价、最低价、涨幅、振幅、生成步骤（记录合并、拆分等日志）
+            //TODO
+            //1. 合并2个连续上涨、下跌，且涨速、跌速相差不大的区间
+            //2. 一个区间中 hi > max(s, e) 或者 lo < min(s, e),（且差距较大？），重新调整s、e
+            //3. 
 
 			DateTime start = DateTime.Now;
             IList<KJapaneseData> lk = KJapaneseData.FindAll(this._db, item.StockId);

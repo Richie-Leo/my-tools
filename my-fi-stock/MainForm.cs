@@ -15,7 +15,7 @@ namespace Pandora.Invest
 {
 	public partial class MainForm : Form
 	{
-		private const int THREAD_COUNT = 4;
+		private const int THREAD_COUNT = 1;
 		
 		private ProgressController _progressController;
 		
@@ -107,7 +107,26 @@ namespace Pandora.Invest
 				.Start();
 		}
 		
-		
+        void BtnUpdateShareholdersNumClick(object sender, EventArgs e)
+        {
+            int startId = 1;
+            int.TryParse(this.txtStartStockId.Text, out startId);
+
+            Database db = new Database(this.txtDatabase.Text);
+            db.Open();
+            IList<Stock> stocks = Stock.FindAll(db);
+            db.Close();
+            while (startId > 1 && stocks.Count > 0 && stocks[0].StockId < startId){
+                stocks.RemoveAt(0);
+            }
+
+            ProgressStatus status = new ProgressStatus();
+            this._progressController.Start("抓取最新股东数", status);
+            var tm = new MThreadManager<Stock>(THREAD_COUNT, typeof(ImpShareHoldersNumWorker), status);
+            tm.SetContext("connection-string", this.txtDatabase.Text)
+                .AddItem(stocks)
+                .Start();
+        }
 		
 		
 		
@@ -144,15 +163,6 @@ namespace Pandora.Invest
 			db.Close();
 		}
 		
-		void BtnUpdateShareholdersNumClick(object sender, EventArgs e)
-		{
-			int startId = 1;
-			int.TryParse(this.txtStartStockId.Text, out startId);
-			Database db = new Database(this.txtDatabase.Text);
-			db.Open();
-			ImpShareholdersNum.DoGet(db, startId);
-			db.Close();
-		}
 		void BtnSelPlateFileClick(object sender, EventArgs e)
 		{
 			this.dlgSelFile.Multiselect = false;
