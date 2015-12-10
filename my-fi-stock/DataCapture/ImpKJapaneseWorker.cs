@@ -58,14 +58,11 @@ namespace Pandora.Invest.DataCapture
 						}
 						//有的股票名称中间有空格字符
 						string name = line.Substring(code.Length, line.IndexOf("日线", StringComparison.CurrentCulture) - code.Length).Trim();
-						
 						stock = Stock.Get(_db, code);
 						if(stock==null){ //股票在bas_stock中不存在，新建
-							stock = new Stock(){ StockId=stockId, StockCode=code, StockName=name };
-							stock.Create(_db);
-						}else{ //股票在bas_stock中存在，取stock id
-							stock.StockName = name;
-							stock.UpdateName(_db);
+                            stock = new Stock(){ StockId=stockId, StockCode=code, StockName=name };
+                            stock.Create(_db);
+                            return; 
 						}
 						continue;
 					}

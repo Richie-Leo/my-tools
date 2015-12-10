@@ -119,6 +119,7 @@
     <Compile Include="Entity\MAType.cs" />
     <Compile Include="Entity\KTrendMembers.cs" />
     <Compile Include="DataCapture\Http\ImpShareHoldersNumWorker.cs" />
+    <Compile Include="Basis\Utils\HttpUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

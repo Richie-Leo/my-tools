@@ -58,9 +58,9 @@ namespace Pandora.Invest.DataCapture
 			KTrendVMALong.BatchImport(this._db, lvmal);
 			
 			TimeSpan ts1 = loaded-start, ts2 = caculated-loaded, ts3 = DateTime.Now - caculated;
-			Info(item.StockCode + ", load:" + ts1.TotalMilliseconds.ToString("F0") 
-			    + ", caculate:" + ts2.TotalMilliseconds.ToString("F0")
-			    + ", insert:" + ts3.TotalMilliseconds.ToString("F0"));
+			Info("Elapsed: load=" + ts1.TotalMilliseconds.ToString("F0") 
+			    + ", caculate=" + ts2.TotalMilliseconds.ToString("F0")
+			    + ", insert=" + ts3.TotalMilliseconds.ToString("F0"));
 		}
 
         public override void AfterDo(MThreadContext context)

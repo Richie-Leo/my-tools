@@ -15,7 +15,7 @@ namespace Pandora.Invest
 {
 	public partial class MainForm : Form
 	{
-		private const int THREAD_COUNT = 1;
+		private const int THREAD_COUNT = 4;
 		
 		private ProgressController _progressController;
 		
@@ -67,9 +67,17 @@ namespace Pandora.Invest
 		
 		void BtnImpStockExtInfoClick(object sender, EventArgs e)
 		{
-			ProgressStatus status = new ProgressStatus();
-			this._progressController.Start("抓取股票基础信息", status);
-			ImpStockBasicInfo.DoGet(this.txtDatabase.Text, status);
+            Database db = new Database(this.txtDatabase.Text);
+            db.Open();
+            IList<Stock> stocks = Stock.FindAll(db);
+            db.Close();
+
+            ProgressStatus status = new ProgressStatus();
+            this._progressController.Start("抓取股票基础信息", status);
+            var tm = new MThreadManager<Stock>(THREAD_COUNT, typeof(ImpStockInfoWorker), status);
+            tm.SetContext("connection-string", this.txtDatabase.Text)
+                .AddItem(stocks)
+                .Start();
 		}
 		
 		void BtnFilterStockClick(object sender, EventArgs e)
