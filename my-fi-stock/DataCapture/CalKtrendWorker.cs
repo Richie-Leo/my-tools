@@ -47,9 +47,9 @@ namespace Pandora.Invest.DataCapture
             List<KTrendVMALong> lvmal = new List<KTrendVMALong>();
 
             this.BuildKTrend(lmas, lmal, lvmal, item, lk, dw);
-            lmal = this.Split(lmal, lk, dw, lmas);
-            this.ReviseVertexPosition(lmal, lk, dw);
-            this.Merge(lmal, dw);
+//            lmal = this.Split(lmal, lk, dw, lmas);
+//            this.ReviseVertexPosition(lmal, lk, dw);
+//            this.Merge(lmal, dw);
 
             DateTime caculated = DateTime.Now;
 			
@@ -72,56 +72,58 @@ namespace Pandora.Invest.DataCapture
         /// <summary>
         /// 构建趋势区间，构建好的结果分别放在入参lmas、lmal、lvmal中
         /// </summary>
-        /// <param name="lmas">输出：短期均价趋势区间</param>
-        /// <param name="lmal">输出：长期均价趋势区间</param>
-        /// <param name="lvmal">输出：长期均量趋势区间</param>
+        /// <param name="lmas">输出：短期均价趋势区间 lmas: list MA short</param>
+        /// <param name="lmal">输出：长期均价趋势区间 lmal: list MA long</param>
+        /// <param name="lvmal">输出：长期均量趋势区间 lvmal: list VMA long</param>
         /// <param name="stock"></param>
-        /// <param name="lk">K线数据: 列表</param>
-        /// <param name="dw">K线数据: 字典</param>
+        /// <param name="lk">K线数据: 列表 lk: list KJapanese</param>
+        /// <param name="dkw">K线数据: 字典 dkw: dictionary KJapanese wrapper</param>
         private void BuildKTrend(List<KTrendMAShort> lmas, List<KTrendMALong> lmal, List<KTrendVMALong> lvmal
-            , Stock stock, IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dw){
-            int FragmentIntervalDays = 8;
-            decimal FragmentIntervalNC = 0.01m;
+            , Stock stock, IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dkw){
+            //int FragmentIntervalDays = 8;
+            //decimal FragmentIntervalNC = 0.01m;
 
-            bool malf = lk[1].MALong > lk[0].MALong, masf = lk[1].MAShort > lk[0].MAShort, vmalf = lk[1].VMALong > lk[0].VMALong;
-            int mali = 0, masi = 0, vmali = 0;
+            //fmal: flag MA long
+            bool fmal = lk[1].MALong > lk[0].MALong, fmas = lk[1].MAShort > lk[0].MAShort, fvmal = lk[1].VMALong > lk[0].VMALong;
+            //imal: index of MA long
+            int imal = 0, imas = 0, ivmal = 0;
             KTrendMALong mal;
             for (int i = 1; i < lk.Count; i++){
                 //短期价格趋势
                 if (lk[i].MAShort != lk[i - 1].MAShort){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
-                    if ((lk[i].MAShort > lk[i - 1].MAShort) != masf){ //是否趋势转换节点
-                        lmas.Add(this.BuildTrend<KTrendMAShort>(MAType.MAShort, lk, masi, i - 1));
-                        masf = !masf;
-                        masi = i - 1;
+                    if ((lk[i].MAShort > lk[i - 1].MAShort) != fmas){ //是否趋势转换节点
+                        lmas.Add(this.BuildTrend<KTrendMAShort>(MAType.MAShort, lk, imas, i - 1));
+                        fmas = !fmas;
+                        imas = i - 1;
                     }
                 }
                 //长期价格趋势
                 if (lk[i].MALong != lk[i - 1].MALong){ //价格相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
-                    if ((lk[i].MALong > lk[i - 1].MALong) != malf){ //是否趋势转换节点
-                        //plStart：该趋势区间起始索引；i-1：该趋势区间截止索引
-                        mal = this.BuildTrend<KTrendMALong>(MAType.MALong, lk, mali, i - 1);
-                        decimal malNC = KTrend.CalNetChange(lk[mali].MALong, lk[i - 1].MALong);
+                    if ((lk[i].MALong > lk[i - 1].MALong) != fmal){ //是否趋势转换节点
+                        //mali：该趋势区间起始索引；i-1：该趋势区间截止索引
+                        mal = this.BuildTrend<KTrendMALong>(MAType.MALong, lk, imal, i - 1);
+                        //decimal malNC = KTrend.CalNetChange(lk[imal].MALong, lk[i - 1].MALong);
                         //忽略掉时间跨度短，且振幅不大的区间
-                        if (mal.TxDays > FragmentIntervalDays || Math.Abs(malNC) > FragmentIntervalNC){
+                        //if (mal.TxDays > FragmentIntervalDays || Math.Abs(malNC) > FragmentIntervalNC){
                             lmal.Add(mal);
-                            mali = i - 1;
-                        }
-                        malf = !malf;
+                            imal = i - 1;
+                        //}
+                        fmal = !fmal;
                     }
                 }
                 //长期成交量趋势
                 if (lk[i].VMALong != lk[i - 1].VMALong){ //成交量相等，则包含在当前趋势区间中，不相等时才进行趋势转换判断
-                    if ((lk[i].VMALong > lk[i - 1].VMALong) != vmalf){ //是否趋势转换节点
-                        lvmal.Add(this.BuildTrend<KTrendVMALong>(MAType.VMALong, lk, vmali, i - 1));
-                        vmalf = !vmalf;
-                        vmali = i - 1;
+                    if ((lk[i].VMALong > lk[i - 1].VMALong) != fvmal){ //是否趋势转换节点
+                        lvmal.Add(this.BuildTrend<KTrendVMALong>(MAType.VMALong, lk, ivmal, i - 1));
+                        fvmal = !fvmal;
+                        ivmal = i - 1;
                     }
                 }
             }
 
-            lmas.Add(this.BuildTrend<KTrendMAShort>(MAType.MAShort, lk, masi, lk.Count - 1));
-            lmal.Add(this.BuildTrend<KTrendMALong>(MAType.MALong, lk, mali, lk.Count - 1));
-            lvmal.Add(this.BuildTrend<KTrendVMALong>(MAType.VMALong, lk, vmali, lk.Count - 1));
+            lmas.Add(this.BuildTrend<KTrendMAShort>(MAType.MAShort, lk, imas, lk.Count - 1));
+            lmal.Add(this.BuildTrend<KTrendMALong>(MAType.MALong, lk, imal, lk.Count - 1));
+            lvmal.Add(this.BuildTrend<KTrendVMALong>(MAType.VMALong, lk, ivmal, lk.Count - 1));
         }
 
         public T BuildTrend<T>(MAType type, IList<KJapaneseData> lk, int start, int end) where T: KTrend
@@ -169,8 +171,8 @@ namespace Pandora.Invest.DataCapture
         /// 区间合并 (长期价格趋势)，直接修改入参lmal
         /// </summary>
         /// <param name="lmal">输入、输出：K线数据: 列表</param>
-        /// <param name="dw">K线数据: 字典</param>
-        private void Merge(List<KTrendMALong> lmal, IDictionary<DateTime, KDataWrapper> dw){
+        /// <param name="dkw">K线数据: 字典</param>
+        private void Merge(List<KTrendMALong> lmal, IDictionary<DateTime, KDataWrapper> dkw){
             #region Fragment Merge: 合并时间跨度较小的区间
             int DaysForFragmentMerge = 5;
             decimal NCForFragmentMerge = 0.05m;
@@ -204,7 +206,7 @@ namespace Pandora.Invest.DataCapture
                 if(direction>0 && i+1<lmal.Count && lmal[i+1].Id<=0){
                     lmal[i].EndDate = lmal[i+1].EndDate;
                     lmal[i].EndValue = lmal[i+1].EndValue;
-                    lmal[i].TxDays = this.FindTxDays(dw, lmal[i].StartDate, lmal[i].EndDate);
+                    lmal[i].TxDays = this.FindTxDays(dkw, lmal[i].StartDate, lmal[i].EndDate);
                     lmal[i].HighValue = lmal[i].HighValue > lmal[i+1].HighValue ? lmal[i].HighValue : lmal[i+1].HighValue;
                     lmal[i].LowValue = lmal[i].LowValue < lmal[i+1].LowValue ? lmal[i].LowValue : lmal[i+1].LowValue;
                     lmal[i].Amplitude = KTrend.CalNetChange(lmal[i].LowValue, lmal[i].HighValue);
@@ -217,7 +219,7 @@ namespace Pandora.Invest.DataCapture
                 }else if(direction<0 && i>=1 && lmal[i-1].Id<=0){
                     lmal[i-1].EndDate = lmal[i].EndDate;
                     lmal[i-1].EndValue = lmal[i].EndValue;
-                    lmal[i-1].TxDays = this.FindTxDays(dw, lmal[i-1].StartDate, lmal[i-1].EndDate);
+                    lmal[i-1].TxDays = this.FindTxDays(dkw, lmal[i-1].StartDate, lmal[i-1].EndDate);
                     lmal[i-1].HighValue = lmal[i-1].HighValue > lmal[i].HighValue ? lmal[i-1].HighValue : lmal[i].HighValue;
                     lmal[i-1].LowValue = lmal[i-1].LowValue < lmal[i].LowValue ? lmal[i-1].LowValue : lmal[i].LowValue;
                     lmal[i-1].Amplitude = KTrend.CalNetChange(lmal[i-1].LowValue, lmal[i-1].HighValue);
@@ -247,16 +249,16 @@ namespace Pandora.Invest.DataCapture
         /// </summary>
         /// <param name="lmal">输入、输出：长期趋势区间</param>
         /// <param name="lk">K线数据: 列表</param>
-        /// <param name="dw">K线数据: 字典</param>
-        private void ReviseVertexPosition(List<KTrendMALong> lmal , IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dw){
+        /// <param name="dkw">K线数据: 字典</param>
+        private void ReviseVertexPosition(List<KTrendMALong> lmal , IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dkw){
             for (int i = 0; i < lmal.Count - 1;){ //对区间截止点进行调整，最后一个区间无需调整
                 bool findMax = true, leftFirst = true;
                 if (lmal[i].Id <= 0 && lmal[i + 1].Id <= 0){
                     //当前区间、下一区间都属于长期趋势中的区间
-                    findMax = this.FindKData(dw, lmal[i].StartDate).MALong < this.FindKData(dw, lmal[i].EndDate).MALong;
+                    findMax = this.FindKData(dkw, lmal[i].StartDate).MALong < this.FindKData(dkw, lmal[i].EndDate).MALong;
                     //优先查找涨速较快的一侧
                     leftFirst = Math.Abs(lmal[i].ChangeSpeed) > Math.Abs(lmal[i + 1].ChangeSpeed);
-                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dw);
+                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
                     i++;
                     continue;
                 }
@@ -264,7 +266,7 @@ namespace Pandora.Invest.DataCapture
                     //当前区间属于长期趋势中的区间，下一区间属于短期趋势中的区间
                     findMax = lmal[i+1].StartValue > lmal[i+1].EndValue;
                     leftFirst = false;
-                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dw);
+                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
                     i++;
                     continue;
                 }
@@ -272,11 +274,11 @@ namespace Pandora.Invest.DataCapture
                     //当前区间属于短期趋势中的区间
                     findMax = lmal[i].StartValue < lmal[i+1].StartValue;
                     leftFirst = true;
-                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dw);
+                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
                     if (i + 2 < lmal.Count && lmal[i+2].Id<=0){
-                        findMax = this.FindKData(dw, lmal[i+2].StartDate).MALong < this.FindKData(dw, lmal[i+2].EndDate).MALong;
+                        findMax = this.FindKData(dkw, lmal[i+2].StartDate).MALong < this.FindKData(dkw, lmal[i+2].EndDate).MALong;
                         leftFirst = Math.Abs(lmal[i+1].ChangeSpeed) > Math.Abs(lmal[i + 2].ChangeSpeed);
-                        this.ReviseVertexPosition(lmal[i+1], lmal[i+2], findMax, leftFirst, lk, dw);
+                        this.ReviseVertexPosition(lmal[i+1], lmal[i+2], findMax, leftFirst, lk, dkw);
                     }
                     i += 2;
                     continue;
@@ -294,15 +296,15 @@ namespace Pandora.Invest.DataCapture
         /// <param name="findMax">是否从搜索范围中查找最大值作为更优顶点位置</param>
         /// <param name="leftFirst">是否优先从左侧查找</param>
         /// <param name="k">KJapanese data list</param>
-        /// <param name="w">KJapanese data Dictionary wrapper</param>
+        /// <param name="dkw">KJapanese data Dictionary wrapper</param>
         private void ReviseVertexPosition(KTrendMALong cur, KTrendMALong next, bool findMax, bool leftFirst
-            , IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dw){
+            , IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dkw){
             int LookAroundDaysL = 5; //长期趋势区间，从前、后n天中查找更佳的顶点位置
             int LookAroundDaysS = 2; //短期趋势区间，从前、后n天中查找更佳的顶点位置
             decimal IgnoreRate = 0.03m; //顶点优先朝涨速较快的一侧调整，如果涨速较慢的一侧差异超过x%，则朝较慢一侧调整
 
             int lookAroundDays = cur.Id > 0 || next.Id > 0 ? LookAroundDaysS : LookAroundDaysL;
-            int index = this.FindKWrapper(dw, cur.EndDate).Index; //区间截止点在K线数据中的索引位置
+            int index = this.FindKWrapper(dkw, cur.EndDate).Index; //区间截止点在K线数据中的索引位置
             int match = index; //比截止点更适合的顶点位置
 
             int dr = leftFirst ? -1 : 1;
@@ -339,19 +341,19 @@ namespace Pandora.Invest.DataCapture
                     + "] -> [" + lk[match].TxDate.ToString("yyMMdd") + " " + lk[match].ClosePrice.ToString("f2") + "]");
                 cur.EndDate = lk[match].TxDate;
                 cur.EndValue = lk[match].ClosePrice;
-                cur.TxDays = this.FindTxDays(dw, cur.StartDate, cur.EndDate);
+                cur.TxDays = this.FindTxDays(dkw, cur.StartDate, cur.EndDate);
                 KTrend.CalChangeSpeed(cur);
                 cur.NetChange = KTrend.CalNetChange(cur.StartValue, cur.EndValue);
                 KTrend.CalHighLowValue(cur, MAType.MALong, lk
-                                       , this.FindKWrapper(dw, cur.StartDate).Index, this.FindKWrapper(dw, cur.EndDate).Index);
+                                       , this.FindKWrapper(dkw, cur.StartDate).Index, this.FindKWrapper(dkw, cur.EndDate).Index);
 
                 next.StartDate = lk[match].TxDate;
                 next.StartValue = lk[match].ClosePrice;
-                next.TxDays = this.FindTxDays(dw, next.StartDate, next.EndDate);
+                next.TxDays = this.FindTxDays(dkw, next.StartDate, next.EndDate);
                 KTrend.CalChangeSpeed(next);
                 next.NetChange = KTrend.CalNetChange(next.StartValue, next.EndValue);
                 KTrend.CalHighLowValue(next, MAType.MALong, lk
-                                       , this.FindKWrapper(dw, next.StartDate).Index, this.FindKWrapper(dw, next.EndDate).Index);
+                                       , this.FindKWrapper(dkw, next.StartDate).Index, this.FindKWrapper(dkw, next.EndDate).Index);
             }
         }
         #endregion
@@ -365,7 +367,7 @@ namespace Pandora.Invest.DataCapture
         /// <param name="dw">K线数据字典</param>
         /// <param name="lmas">短期趋势区间</param>
         private List<KTrendMALong> Split(List<KTrendMALong> lmal,
-            IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dw, List<KTrendMAShort> lmas){
+            IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dkw, List<KTrendMAShort> lmas){
             //基于短期趋势，查找快速主升和暴跌的区间，将这类区间单独拆分出来，避免他们被前后横盘震荡区间消弱
             List<KTrendMAShort> jumpAndCrash = new List<KTrendMAShort>();
             decimal NCForJumpCrash = 0.25m; //涨跌幅超过多少算暴涨暴跌
@@ -386,10 +388,10 @@ namespace Pandora.Invest.DataCapture
                         //   这种情况无需对长期趋势区间进行拆分
                         if (!(mas.StartDate >= mal.EndDate || mas.EndDate <= mal.StartDate)){ //排除掉长期趋势和短期趋势区间不可能重叠的情况
                             //开始日期和结束日期相差天数
-                            int days1 = this.FindTxDays(dw
+                            int days1 = this.FindTxDays(dkw
                                 , mas.StartDate<mal.StartDate ? mas.StartDate : mal.StartDate
                                 , mas.StartDate<mal.StartDate ? mal.StartDate : mas.StartDate);
-                            int days2 = this.FindTxDays(dw
+                            int days2 = this.FindTxDays(dkw
                                 , mas.EndDate<mal.EndDate ? mas.EndDate : mal.EndDate
                                 , mas.EndDate<mal.EndDate ? mal.EndDate : mas.EndDate);
                             if (days1 <= DaysDistForDup && days2 <= DaysDistForDup){
@@ -452,12 +454,12 @@ namespace Pandora.Invest.DataCapture
                         StartDate = lmal[i].StartDate,
                         StartValue = lmal[i].StartValue,
                         EndDate = jumpAndCrash[0].StartDate,
-                        EndValue = this.FindKData(dw, jumpAndCrash[0].StartDate).ClosePrice,
-                        TxDays = this.FindTxDays(dw, lmal[i].StartDate, jumpAndCrash[0].StartDate)
+                        EndValue = this.FindKData(dkw, jumpAndCrash[0].StartDate).ClosePrice,
+                        TxDays = this.FindTxDays(dkw, lmal[i].StartDate, jumpAndCrash[0].StartDate)
                     };
                     mal.Remark = lmal[i].Remark + "; Trunc(,<<" + lmal[i].EndDate.ToString("yyyyMMdd") + ")";
                     KTrend.CalChangeSpeed(mal);
-                    KTrend.CalHighLowValue(mal, MAType.MALong, lk, this.FindKWrapper(dw, mal.StartDate).Index, this.FindKWrapper(dw, mal.EndDate).Index);
+                    KTrend.CalHighLowValue(mal, MAType.MALong, lk, this.FindKWrapper(dkw, mal.StartDate).Index, this.FindKWrapper(dkw, mal.EndDate).Index);
                     mal.NetChange = KTrend.CalNetChange(mal.StartValue, mal.EndValue);
                     result.Add(mal);
                 }
@@ -470,14 +472,14 @@ namespace Pandora.Invest.DataCapture
                     Id = 99,
                     StockId = jumpAndCrash[0].StockId,
                     StartDate = jumpAndCrash[0].StartDate,
-                    StartValue = this.FindKData(dw, jumpAndCrash[0].StartDate).ClosePrice,
+                    StartValue = this.FindKData(dkw, jumpAndCrash[0].StartDate).ClosePrice,
                     EndDate = jumpAndCrash[0].EndDate,
-                    EndValue = this.FindKData(dw, jumpAndCrash[0].EndDate).ClosePrice,
-                    TxDays = this.FindTxDays(dw, jumpAndCrash[0].StartDate, jumpAndCrash[0].EndDate)
+                    EndValue = this.FindKData(dkw, jumpAndCrash[0].EndDate).ClosePrice,
+                    TxDays = this.FindTxDays(dkw, jumpAndCrash[0].StartDate, jumpAndCrash[0].EndDate)
                 };
                 mal.Remark = "MAS";
                 KTrend.CalChangeSpeed(mal);
-                KTrend.CalHighLowValue(mal, MAType.MALong, lk, this.FindKWrapper(dw, mal.StartDate).Index, this.FindKWrapper(dw, mal.EndDate).Index);
+                KTrend.CalHighLowValue(mal, MAType.MALong, lk, this.FindKWrapper(dkw, mal.StartDate).Index, this.FindKWrapper(dkw, mal.EndDate).Index);
                 mal.NetChange = KTrend.CalNetChange(mal.StartValue, mal.EndValue);
                 Info("[strong-motion] [" + mal.StartDate.ToString("yyMMdd") 
                     + " > " + mal.EndDate.ToString("yyMMdd") + " " + mal.TxDays + " days] [AM:" 
@@ -488,9 +490,9 @@ namespace Pandora.Invest.DataCapture
                     lmal[i].Remark += "; Trunc(" + lmal[i].StartDate.ToString("yyyyMMdd") + ">>,)";
                     lmal[i].StartDate = mal.EndDate;
                     lmal[i].StartValue = mal.EndValue;
-                    lmal[i].TxDays = this.FindTxDays(dw, lmal[i].StartDate, lmal[i].EndDate);
+                    lmal[i].TxDays = this.FindTxDays(dkw, lmal[i].StartDate, lmal[i].EndDate);
                     KTrend.CalChangeSpeed(lmal[i]);
-                    KTrend.CalHighLowValue(lmal[i], MAType.MALong, lk, this.FindKWrapper(dw, lmal[i].StartDate).Index, this.FindKWrapper(dw, lmal[i].EndDate).Index);
+                    KTrend.CalHighLowValue(lmal[i], MAType.MALong, lk, this.FindKWrapper(dkw, lmal[i].StartDate).Index, this.FindKWrapper(dkw, lmal[i].EndDate).Index);
                     lmal[i].NetChange = KTrend.CalNetChange(lmal[i].StartValue, lmal[i].EndValue);
                 }
                 jumpAndCrash.RemoveAt(0);
