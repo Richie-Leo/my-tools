@@ -25,7 +25,7 @@ namespace Pandora.Invest.DataCapture
 		public override void Do(MThreadContext context, Stock item)
 		{
 			//TODO
-			if(item.StockId!=600621) return;
+            //if(item.StockId!=600621 && item.StockId!=998) return;
 
             //TODO
             //1. 合并2个连续上涨、下跌，且涨速、跌速相差不大的区间
@@ -47,8 +47,8 @@ namespace Pandora.Invest.DataCapture
             List<KTrendVMALong> lvmal = new List<KTrendVMALong>();
 
             this.BuildKTrend(lmas, lmal, lvmal, item, lk, dw);
+            this.ReviseVertexPosition(lmal, lk, dw);
 //            lmal = this.Split(lmal, lk, dw, lmas);
-//            this.ReviseVertexPosition(lmal, lk, dw);
 //            this.Merge(lmal, dw);
 
             DateTime caculated = DateTime.Now;
@@ -126,7 +126,10 @@ namespace Pandora.Invest.DataCapture
             lvmal.Add(this.BuildTrend<KTrendVMALong>(MAType.VMALong, lk, ivmal, lk.Count - 1));
         }
 
-        public T BuildTrend<T>(MAType type, IList<KJapaneseData> lk, int start, int end) where T: KTrend
+        public T BuildTrend<T>(MAType type, IList<KJapaneseData> lk, int start, int end) where T: KTrend{
+            return this.BuildTrend<T>(type, lk, start, end, null);
+        }
+        public T BuildTrend<T>(MAType type, IList<KJapaneseData> lk, int start, int end, string remark) where T: KTrend
         {
             T result = default(T);
             KTrend trend = null;
@@ -148,13 +151,13 @@ namespace Pandora.Invest.DataCapture
                 case MAType.MALong:
                     trend.StartValue = lk[start].ClosePrice;
                     trend.EndValue = lk[end].ClosePrice;
-                    trend.Remark = "MAL";
+                    trend.Remark = (remark == null || remark.Trim().Length <= 0) ? "MAL" : remark;
                     break;
                 case MAType.VMAShort:
                 case MAType.VMALong:
                     trend.StartValue = lk[start].Volume;
                     trend.EndValue = lk[end].Volume;
-                    trend.Remark = "VMAL";
+                    trend.Remark = (remark == null || remark.Trim().Length <= 0) ? "VMAL" : remark;
                     break;
             }
 
@@ -251,41 +254,72 @@ namespace Pandora.Invest.DataCapture
         /// <param name="lk">K线数据: 列表</param>
         /// <param name="dkw">K线数据: 字典</param>
         private void ReviseVertexPosition(List<KTrendMALong> lmal , IList<KJapaneseData> lk, IDictionary<DateTime, KDataWrapper> dkw){
-            for (int i = 0; i < lmal.Count - 1;){ //对区间截止点进行调整，最后一个区间无需调整
-                bool findMax = true, leftFirst = true;
-                if (lmal[i].Id <= 0 && lmal[i + 1].Id <= 0){
-                    //当前区间、下一区间都属于长期趋势中的区间
-                    findMax = this.FindKData(dkw, lmal[i].StartDate).MALong < this.FindKData(dkw, lmal[i].EndDate).MALong;
-                    //优先查找涨速较快的一侧
-                    leftFirst = Math.Abs(lmal[i].ChangeSpeed) > Math.Abs(lmal[i + 1].ChangeSpeed);
-                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
-                    i++;
-                    continue;
-                }
-                if (lmal[i].Id <= 0 && lmal[i + 1].Id > 0){
-                    //当前区间属于长期趋势中的区间，下一区间属于短期趋势中的区间
-                    findMax = lmal[i+1].StartValue > lmal[i+1].EndValue;
-                    leftFirst = false;
-                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
-                    i++;
-                    continue;
-                }
-                if (lmal[i].Id > 0){
-                    //当前区间属于短期趋势中的区间
-                    findMax = lmal[i].StartValue < lmal[i+1].StartValue;
-                    leftFirst = true;
-                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
-                    if (i + 2 < lmal.Count && lmal[i+2].Id<=0){
-                        findMax = this.FindKData(dkw, lmal[i+2].StartDate).MALong < this.FindKData(dkw, lmal[i+2].EndDate).MALong;
-                        leftFirst = Math.Abs(lmal[i+1].ChangeSpeed) > Math.Abs(lmal[i + 2].ChangeSpeed);
-                        this.ReviseVertexPosition(lmal[i+1], lmal[i+2], findMax, leftFirst, lk, dkw);
+            List<bool> flags = new List<bool>(lmal.Count);
+            foreach (KTrendMALong mal in lmal)
+                flags.Add(this.FindKData(dkw, mal.EndDate).MALong > this.FindKData(dkw, mal.StartDate).MALong);
+            for (int i = 0; i <= lmal.Count - 1; i++){
+                if (lmal[i].EndValue == lmal[i].StartValue)
+                    continue; 
+                int iStart = this.FindKWrapper(dkw, lmal[i].StartDate).Index;
+                int iEnd = this.FindKWrapper(dkw, lmal[i].EndDate).Index;
+                int secStart = iStart, secEnd = iEnd;
+                for (int j = iStart; j <= iEnd; j++){
+                    if (i > 0){
+                        if ((flags[i] && lk[j].ClosePrice < lk[secStart].ClosePrice) || (!flags[i] && lk[j].ClosePrice > lk[secStart].ClosePrice))
+                            secStart = j;
                     }
-                    i += 2;
+                    if (i < lmal.Count - 1){
+                        if ((flags[i] && lk[j].ClosePrice > lk[secEnd].ClosePrice) || (!flags[i] && lk[j].ClosePrice < lk[secEnd].ClosePrice))
+                            secEnd = j;
+                    }
+                }
+                if (secStart >= secEnd){
+                    Info("Revise vertex position error: " + lmal[i].StartDate.ToString("yyyyMMdd") + "->" + lmal[i].EndDate.ToString("yyyyMMdd")
+                        + ", new start=" + lk[secStart].TxDate.ToString("yyyyMMdd") + ", new end=" + lk[secEnd].TxDate.ToString("yyyyMMdd"));
                     continue;
                 }
-                Error("Unrecognized trend zone, ignored", null);
-                i++;
+                if (secStart != iStart || secEnd != iEnd)
+                    lmal[i] = this.BuildTrend<KTrendMALong>(MAType.MALong, lk, secStart, secEnd, lmal[i].Remark);
+                if (secStart != iStart && i > 0)
+                    lmal[i - 1] = this.BuildTrend<KTrendMALong>(MAType.MALong, lk, this.FindKWrapper(dkw, lmal[i - 1].StartDate).Index, secStart, lmal[i - 1].Remark);
+                if (secEnd != iEnd && i < lmal.Count - 1)
+                    lmal[i + 1] = this.BuildTrend<KTrendMALong>(MAType.MALong, lk, secEnd, this.FindKWrapper(dkw, lmal[i + 1].EndDate).Index, lmal[i + 1].Remark);
             }
+//            for (int i = 0; i < lmal.Count - 1;){ //对区间截止点进行调整，最后一个区间无需调整
+//                bool findMax = true, leftFirst = true;
+//                if (lmal[i].Id <= 0 && lmal[i + 1].Id <= 0){
+//                    //当前区间、下一区间都属于长期趋势中的区间
+//                    findMax = this.FindKData(dkw, lmal[i].StartDate).MALong < this.FindKData(dkw, lmal[i].EndDate).MALong;
+//                    //优先查找涨速较快的一侧
+//                    leftFirst = Math.Abs(lmal[i].ChangeSpeed) > Math.Abs(lmal[i + 1].ChangeSpeed);
+//                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
+//                    i++;
+//                    continue;
+//                }
+//                if (lmal[i].Id <= 0 && lmal[i + 1].Id > 0){
+//                    //当前区间属于长期趋势中的区间，下一区间属于短期趋势中的区间
+//                    findMax = lmal[i+1].StartValue > lmal[i+1].EndValue;
+//                    leftFirst = false;
+//                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
+//                    i++;
+//                    continue;
+//                }
+//                if (lmal[i].Id > 0){
+//                    //当前区间属于短期趋势中的区间
+//                    findMax = lmal[i].StartValue < lmal[i+1].StartValue;
+//                    leftFirst = true;
+//                    this.ReviseVertexPosition(lmal[i], lmal[i + 1], findMax, leftFirst, lk, dkw);
+//                    if (i + 2 < lmal.Count && lmal[i+2].Id<=0){
+//                        findMax = this.FindKData(dkw, lmal[i+2].StartDate).MALong < this.FindKData(dkw, lmal[i+2].EndDate).MALong;
+//                        leftFirst = Math.Abs(lmal[i+1].ChangeSpeed) > Math.Abs(lmal[i + 2].ChangeSpeed);
+//                        this.ReviseVertexPosition(lmal[i+1], lmal[i+2], findMax, leftFirst, lk, dkw);
+//                    }
+//                    i += 2;
+//                    continue;
+//                }
+//                Error("Unrecognized trend zone, ignored", null);
+//                i++;
+//            }
         }
 
         /// <summary>
