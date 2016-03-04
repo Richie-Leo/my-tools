@@ -74,7 +74,7 @@ namespace Pandora.Invest
 
             ProgressStatus status = new ProgressStatus();
             this._progressController.Start("抓取股票基础信息", status);
-            var tm = new MThreadManager<Stock>(THREAD_COUNT, typeof(ImpStockInfoWorker), status);
+            var tm = new MThreadManager<Stock>(THREAD_COUNT, typeof(ImpStockBasInfoWorker), status);
             tm.SetContext("connection-string", this.txtDatabase.Text)
                 .AddItem(stocks)
                 .Start();

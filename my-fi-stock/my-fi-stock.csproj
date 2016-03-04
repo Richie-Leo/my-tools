@@ -119,7 +119,8 @@
     <Compile Include="Entity\KTrendMembers.cs" />
     <Compile Include="DataCapture\Http\ImpShareHoldersNumWorker.cs" />
     <Compile Include="Basis\Utils\HttpUtil.cs" />
-    <Compile Include="DataCapture\Http\ImpStockInfoWorker.cs" />
+    <Compile Include="DataCapture\Http\ImpStockBasInfoWorker.cs" />
+    <Compile Include="Basis\Utils\HtmlUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

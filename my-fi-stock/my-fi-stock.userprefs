@@ -1,8 +1,9 @@
 ﻿<Properties StartupItem="my-fi-stock.csproj">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="DataCapture/CalKtrendWorker.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Basis/Utils/HttpUtil.cs">
     <Files>
-      <File FileName="DataCapture/CalKtrendWorker.cs" Line="16" Column="4" />
+      <File FileName="DataCapture/Http/ImpStockBasInfoWorker.cs" Line="120" Column="37" />
+      <File FileName="Basis/Utils/HttpUtil.cs" Line="56" Column="23" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

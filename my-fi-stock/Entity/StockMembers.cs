@@ -46,16 +46,16 @@ namespace Pandora.Invest.Entity
 		public void UpdateInfo(Database db){
 			db.ExecNonQuery(
 				string.Format(
-					"update {0} set {1}=?date,{2}=?tCap,{3}=?cCap,{4}=?eps,{5}=?navps,{6}=?growth,{7}=?loc,{8}=?plat where {9}=?id", 
+                    "update {0} set {1}=?date,{2}=?tCap,{3}=?cCap,{4}=?eps,{5}=?navps,{6}=?growth,{7}=?loc,{8}=?plat, {9}=?industry where {10}=?id", 
 					Mapper.TableName, 
 					Mapper.ListDate, Mapper.TotalCapital, Mapper.CirculatingCapital, Mapper.EarningsPerShare,
-					Mapper.NetAssetValuePerShare, Mapper.NetProfitGrowth, Mapper.CompanyLocation, Mapper.Plate,
+                    Mapper.NetAssetValuePerShare, Mapper.NetProfitGrowth, Mapper.CompanyLocation, Mapper.Plate, Mapper.Industry,
 					Mapper.StockId)
-				, new string[]{"date","tCap","cCap","eps","navps","growth","loc","plat","id"}
+                , new string[]{"date","tCap","cCap","eps","navps","growth","loc","plat","industry","id"}
 				, new object[]{
 					this.ListDate, this.TotalCapital, this.CirculatingCapital, this.EarningsPerShare,
 					this.NetAssetValuePerShare, this.NetProfitGrowth, this.CompanyLocation,
-					this.Plate, this.StockId
+                    this.Plate, this.Industry, this.StockId
 				});
 		}
 		

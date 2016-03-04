@@ -54,7 +54,7 @@ namespace Pandora.Invest.MThread
 				Thread thread = new Thread(worker.Start);
 				thread.IsBackground = true;
 				thread.Name = "t" + i.ToString("00");
-				thread.Priority = ThreadPriority.Normal;
+                thread.Priority = ThreadPriority.AboveNormal;
 				
 				thread.Start();
 			}

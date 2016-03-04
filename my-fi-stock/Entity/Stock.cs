@@ -26,6 +26,7 @@ namespace Pandora.Invest.Entity
 			public const string NetAssetValuePerShare = "navps";
 			public const string NetProfitGrowth = "profit_growth";
 			public const string CompanyLocation = "com_loc";
+            public const string Industry = "industry";
 			public const string Plate = "plate";
 		}
 
@@ -79,6 +80,11 @@ namespace Pandora.Invest.Entity
 		/// </summary>
 		public string CompanyLocation { get; set; }
 
+        /// <summary>
+        /// 所属行业。
+        /// </summary>
+        public string Industry { get; set; }
+
 		/// <summary>
 		/// 所属板块。
 		/// </summary>
@@ -96,6 +102,7 @@ namespace Pandora.Invest.Entity
 			this.NetAssetValuePerShare = Convert.ToDecimal(row[Mapper.NetAssetValuePerShare]);
 			this.NetProfitGrowth = Convert.ToDecimal(row[Mapper.NetProfitGrowth]);
 			this.CompanyLocation = Convert.ToString(row[Mapper.CompanyLocation]);
+            this.Industry = Convert.ToString(row[Mapper.Industry]);
 			this.Plate = Convert.ToString(row[Mapper.Plate]);
 		}
 
@@ -103,7 +110,7 @@ namespace Pandora.Invest.Entity
 			public StockBulkInserter(Database db, int batchSize) : base(db, Mapper.TableName, new string[] {
 					Mapper.StockId, Mapper.StockCode, Mapper.StockName, Mapper.ListDate, Mapper.TotalCapital, 
 					Mapper.CirculatingCapital, Mapper.EarningsPerShare, Mapper.NetAssetValuePerShare, Mapper.NetProfitGrowth, Mapper.CompanyLocation, 
-					Mapper.Plate
+                    Mapper.Industry, Mapper.Plate
 				}, batchSize) {}
 
 			public override BulkInserter<T> Push(T obj){
@@ -112,7 +119,7 @@ namespace Pandora.Invest.Entity
 				base.Push(new object[] {
 					e.StockId, e.StockCode, e.StockName, e.ListDate, e.TotalCapital, 
 					e.CirculatingCapital, e.EarningsPerShare, e.NetAssetValuePerShare, e.NetProfitGrowth, e.CompanyLocation, 
-					e.Plate
+                    e.Industry, e.Plate
 				});
 				return this;
 			}
