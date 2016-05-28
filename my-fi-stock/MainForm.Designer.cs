@@ -88,10 +88,10 @@ namespace Pandora.Invest
 			this.lblDatabase = new System.Windows.Forms.Label();
 			this.tabDataCapture = new System.Windows.Forms.TabPage();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.lblProgressRate = new System.Windows.Forms.Label();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.lblProgressTitle = new System.Windows.Forms.Label();
 			this.lblProgressInfo = new System.Windows.Forms.Label();
-			this.lblProgressRate = new System.Windows.Forms.Label();
 			this.btnGenChartKTrend = new System.Windows.Forms.Button();
 			this.txtEndDate = new System.Windows.Forms.TextBox();
 			this.txtStartDate = new System.Windows.Forms.TextBox();
@@ -141,12 +141,13 @@ namespace Pandora.Invest
 			this.tabMainWindow.Controls.Add(this.tabMain);
 			this.tabMainWindow.Controls.Add(this.tabDataCapture);
 			this.tabMainWindow.Controls.Add(this.tabRuleConf);
+			this.tabMainWindow.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.tabMainWindow.Location = new System.Drawing.Point(0, 1);
 			this.tabMainWindow.Margin = new System.Windows.Forms.Padding(0);
 			this.tabMainWindow.Name = "tabMainWindow";
 			this.tabMainWindow.Padding = new System.Drawing.Point(6, 2);
 			this.tabMainWindow.SelectedIndex = 0;
-			this.tabMainWindow.Size = new System.Drawing.Size(1574, 924);
+			this.tabMainWindow.Size = new System.Drawing.Size(1319, 432);
 			this.tabMainWindow.TabIndex = 0;
 			// 
 			// tabMain
@@ -156,10 +157,10 @@ namespace Pandora.Invest
 			this.tabMain.Controls.Add(this.txtDatabase);
 			this.tabMain.Controls.Add(this.lblDatabase);
 			this.tabMain.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.tabMain.Location = new System.Drawing.Point(4, 41);
+			this.tabMain.Location = new System.Drawing.Point(4, 35);
 			this.tabMain.Margin = new System.Windows.Forms.Padding(0);
 			this.tabMain.Name = "tabMain";
-			this.tabMain.Size = new System.Drawing.Size(1566, 879);
+			this.tabMain.Size = new System.Drawing.Size(1311, 393);
 			this.tabMain.TabIndex = 0;
 			this.tabMain.Text = "主窗口";
 			this.tabMain.UseVisualStyleBackColor = true;
@@ -170,20 +171,22 @@ namespace Pandora.Invest
 			this.txtOutput.Multiline = true;
 			this.txtOutput.Name = "txtOutput";
 			this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.txtOutput.Size = new System.Drawing.Size(1550, 821);
+			this.txtOutput.Size = new System.Drawing.Size(1295, 334);
 			this.txtOutput.TabIndex = 14;
 			// 
 			// txtDatabase
 			// 
+			this.txtDatabase.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.txtDatabase.Location = new System.Drawing.Point(116, 5);
 			this.txtDatabase.Name = "txtDatabase";
-			this.txtDatabase.Size = new System.Drawing.Size(1443, 39);
+			this.txtDatabase.Size = new System.Drawing.Size(1186, 35);
 			this.txtDatabase.TabIndex = 8;
 			this.txtDatabase.Text = "Server=127.0.0.1;Database=my_fi_stock;Uid=root;Pwd=dev;charset=utf8;Pooling=true;" +
 	"Max Pool Size=20";
 			// 
 			// lblDatabase
 			// 
+			this.lblDatabase.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.lblDatabase.Location = new System.Drawing.Point(2, 8);
 			this.lblDatabase.Name = "lblDatabase";
 			this.lblDatabase.Size = new System.Drawing.Size(108, 36);
@@ -222,10 +225,10 @@ namespace Pandora.Invest
 			this.tabDataCapture.Controls.Add(this.btnSelTradeListDir);
 			this.tabDataCapture.Controls.Add(this.btnSelKLineDir);
 			this.tabDataCapture.Controls.Add(this.lblKLineDir);
-			this.tabDataCapture.Location = new System.Drawing.Point(4, 41);
+			this.tabDataCapture.Location = new System.Drawing.Point(4, 35);
 			this.tabDataCapture.Margin = new System.Windows.Forms.Padding(0);
 			this.tabDataCapture.Name = "tabDataCapture";
-			this.tabDataCapture.Size = new System.Drawing.Size(1566, 879);
+			this.tabDataCapture.Size = new System.Drawing.Size(1311, 393);
 			this.tabDataCapture.TabIndex = 2;
 			this.tabDataCapture.Text = "数据抓取";
 			this.tabDataCapture.UseVisualStyleBackColor = true;
@@ -236,10 +239,21 @@ namespace Pandora.Invest
 			this.panel1.Controls.Add(this.progressBar);
 			this.panel1.Controls.Add(this.lblProgressTitle);
 			this.panel1.Controls.Add(this.lblProgressInfo);
-			this.panel1.Location = new System.Drawing.Point(9, 782);
+			this.panel1.Location = new System.Drawing.Point(9, 294);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(1548, 85);
+			this.panel1.Size = new System.Drawing.Size(1291, 85);
 			this.panel1.TabIndex = 43;
+			// 
+			// lblProgressRate
+			// 
+			this.lblProgressRate.CausesValidation = false;
+			this.lblProgressRate.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.lblProgressRate.Location = new System.Drawing.Point(1204, 47);
+			this.lblProgressRate.Name = "lblProgressRate";
+			this.lblProgressRate.Size = new System.Drawing.Size(78, 35);
+			this.lblProgressRate.TabIndex = 39;
+			this.lblProgressRate.Text = "0%";
+			this.lblProgressRate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// progressBar
 			// 
@@ -247,7 +261,7 @@ namespace Pandora.Invest
 			this.progressBar.ForeColor = System.Drawing.Color.LimeGreen;
 			this.progressBar.Location = new System.Drawing.Point(0, 47);
 			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(1441, 38);
+			this.progressBar.Size = new System.Drawing.Size(1189, 38);
 			this.progressBar.TabIndex = 37;
 			// 
 			// lblProgressTitle
@@ -262,27 +276,16 @@ namespace Pandora.Invest
 			// lblProgressInfo
 			// 
 			this.lblProgressInfo.CausesValidation = false;
-			this.lblProgressInfo.Font = new System.Drawing.Font("微软雅黑", 9F);
-			this.lblProgressInfo.Location = new System.Drawing.Point(1078, 7);
+			this.lblProgressInfo.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.lblProgressInfo.Location = new System.Drawing.Point(798, 6);
 			this.lblProgressInfo.Name = "lblProgressInfo";
 			this.lblProgressInfo.Size = new System.Drawing.Size(458, 42);
 			this.lblProgressInfo.TabIndex = 38;
 			this.lblProgressInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
-			// lblProgressRate
-			// 
-			this.lblProgressRate.CausesValidation = false;
-			this.lblProgressRate.Font = new System.Drawing.Font("微软雅黑", 9F);
-			this.lblProgressRate.Location = new System.Drawing.Point(1447, 47);
-			this.lblProgressRate.Name = "lblProgressRate";
-			this.lblProgressRate.Size = new System.Drawing.Size(78, 35);
-			this.lblProgressRate.TabIndex = 39;
-			this.lblProgressRate.Text = "0%";
-			this.lblProgressRate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
 			// btnGenChartKTrend
 			// 
-			this.btnGenChartKTrend.Location = new System.Drawing.Point(371, 177);
+			this.btnGenChartKTrend.Location = new System.Drawing.Point(1091, 50);
 			this.btnGenChartKTrend.Name = "btnGenChartKTrend";
 			this.btnGenChartKTrend.Size = new System.Drawing.Size(95, 39);
 			this.btnGenChartKTrend.TabIndex = 42;
@@ -292,23 +295,23 @@ namespace Pandora.Invest
 			// 
 			// txtEndDate
 			// 
-			this.txtEndDate.Location = new System.Drawing.Point(265, 177);
+			this.txtEndDate.Location = new System.Drawing.Point(985, 50);
 			this.txtEndDate.Name = "txtEndDate";
-			this.txtEndDate.Size = new System.Drawing.Size(100, 39);
+			this.txtEndDate.Size = new System.Drawing.Size(100, 35);
 			this.txtEndDate.TabIndex = 41;
 			// 
 			// txtStartDate
 			// 
-			this.txtStartDate.Location = new System.Drawing.Point(158, 176);
+			this.txtStartDate.Location = new System.Drawing.Point(878, 49);
 			this.txtStartDate.Name = "txtStartDate";
-			this.txtStartDate.Size = new System.Drawing.Size(100, 39);
+			this.txtStartDate.Size = new System.Drawing.Size(100, 35);
 			this.txtStartDate.TabIndex = 40;
 			// 
 			// txtStockCode
 			// 
-			this.txtStockCode.Location = new System.Drawing.Point(51, 175);
+			this.txtStockCode.Location = new System.Drawing.Point(771, 48);
 			this.txtStockCode.Name = "txtStockCode";
-			this.txtStockCode.Size = new System.Drawing.Size(100, 39);
+			this.txtStockCode.Size = new System.Drawing.Size(100, 35);
 			this.txtStockCode.TabIndex = 39;
 			// 
 			// btnImpStockExtInfo
@@ -333,7 +336,7 @@ namespace Pandora.Invest
 			// 
 			// btnImpPlate
 			// 
-			this.btnImpPlate.Location = new System.Drawing.Point(841, 352);
+			this.btnImpPlate.Location = new System.Drawing.Point(638, 217);
 			this.btnImpPlate.Margin = new System.Windows.Forms.Padding(0);
 			this.btnImpPlate.Name = "btnImpPlate";
 			this.btnImpPlate.Size = new System.Drawing.Size(80, 45);
@@ -350,16 +353,16 @@ namespace Pandora.Invest
 			"上证50",
 			"沪深300",
 			"融资融券"});
-			this.comboPlate.Location = new System.Drawing.Point(720, 351);
+			this.comboPlate.Location = new System.Drawing.Point(517, 216);
 			this.comboPlate.Name = "comboPlate";
-			this.comboPlate.Size = new System.Drawing.Size(93, 39);
+			this.comboPlate.Size = new System.Drawing.Size(93, 32);
 			this.comboPlate.TabIndex = 35;
 			// 
 			// btnSelPlateFile
 			// 
 			this.btnSelPlateFile.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.btnSelPlateFile.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.btnSelPlateFile.Location = new System.Drawing.Point(614, 352);
+			this.btnSelPlateFile.Location = new System.Drawing.Point(411, 217);
 			this.btnSelPlateFile.Margin = new System.Windows.Forms.Padding(0);
 			this.btnSelPlateFile.Name = "btnSelPlateFile";
 			this.btnSelPlateFile.Size = new System.Drawing.Size(39, 39);
@@ -370,8 +373,8 @@ namespace Pandora.Invest
 			// 
 			// label5
 			// 
-			this.label5.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.label5.Location = new System.Drawing.Point(629, 352);
+			this.label5.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.label5.Location = new System.Drawing.Point(426, 217);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(89, 45);
 			this.label5.TabIndex = 33;
@@ -380,16 +383,16 @@ namespace Pandora.Invest
 			// 
 			// txtPlateFile
 			// 
-			this.txtPlateFile.Location = new System.Drawing.Point(327, 352);
+			this.txtPlateFile.Location = new System.Drawing.Point(124, 217);
 			this.txtPlateFile.Name = "txtPlateFile";
-			this.txtPlateFile.Size = new System.Drawing.Size(286, 39);
+			this.txtPlateFile.Size = new System.Drawing.Size(286, 35);
 			this.txtPlateFile.TabIndex = 31;
 			this.txtPlateFile.Text = "D:\\stock\\板块";
 			// 
 			// label4
 			// 
-			this.label4.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.label4.Location = new System.Drawing.Point(218, 351);
+			this.label4.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.label4.Location = new System.Drawing.Point(15, 216);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(111, 40);
 			this.label4.TabIndex = 32;
@@ -398,8 +401,8 @@ namespace Pandora.Invest
 			// 
 			// label3
 			// 
-			this.label3.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.label3.Location = new System.Drawing.Point(262, 309);
+			this.label3.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.label3.Location = new System.Drawing.Point(59, 174);
 			this.label3.Margin = new System.Windows.Forms.Padding(0);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(245, 40);
@@ -409,16 +412,16 @@ namespace Pandora.Invest
 			// 
 			// txtStartStockId
 			// 
-			this.txtStartStockId.Location = new System.Drawing.Point(1102, 246);
+			this.txtStartStockId.Location = new System.Drawing.Point(893, 114);
 			this.txtStartStockId.MaxLength = 6;
 			this.txtStartStockId.Name = "txtStartStockId";
-			this.txtStartStockId.Size = new System.Drawing.Size(113, 39);
+			this.txtStartStockId.Size = new System.Drawing.Size(113, 35);
 			this.txtStartStockId.TabIndex = 29;
 			this.txtStartStockId.Text = "1";
 			// 
 			// lblStartStockId
 			// 
-			this.lblStartStockId.Location = new System.Drawing.Point(979, 249);
+			this.lblStartStockId.Location = new System.Drawing.Point(770, 117);
 			this.lblStartStockId.Name = "lblStartStockId";
 			this.lblStartStockId.Size = new System.Drawing.Size(125, 42);
 			this.lblStartStockId.TabIndex = 28;
@@ -438,22 +441,22 @@ namespace Pandora.Invest
 			// 
 			this.txtKLineDir.Location = new System.Drawing.Point(119, 45);
 			this.txtKLineDir.Name = "txtKLineDir";
-			this.txtKLineDir.Size = new System.Drawing.Size(203, 39);
+			this.txtKLineDir.Size = new System.Drawing.Size(203, 35);
 			this.txtKLineDir.TabIndex = 16;
 			this.txtKLineDir.Text = "D:\\stock\\klines";
 			// 
 			// txtTradeListDir
 			// 
-			this.txtTradeListDir.Location = new System.Drawing.Point(473, 449);
+			this.txtTradeListDir.Location = new System.Drawing.Point(851, 217);
 			this.txtTradeListDir.Name = "txtTradeListDir";
-			this.txtTradeListDir.Size = new System.Drawing.Size(286, 39);
+			this.txtTradeListDir.Size = new System.Drawing.Size(286, 35);
 			this.txtTradeListDir.TabIndex = 11;
 			this.txtTradeListDir.Text = "D:\\stock\\002241";
 			// 
 			// lblTimeshareTransDir
 			// 
-			this.lblTimeshareTransDir.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.lblTimeshareTransDir.Location = new System.Drawing.Point(386, 448);
+			this.lblTimeshareTransDir.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.lblTimeshareTransDir.Location = new System.Drawing.Point(764, 216);
 			this.lblTimeshareTransDir.Name = "lblTimeshareTransDir";
 			this.lblTimeshareTransDir.Size = new System.Drawing.Size(89, 40);
 			this.lblTimeshareTransDir.TabIndex = 19;
@@ -462,7 +465,7 @@ namespace Pandora.Invest
 			// 
 			// btnUpdateShareholdersNum
 			// 
-			this.btnUpdateShareholdersNum.Location = new System.Drawing.Point(1221, 247);
+			this.btnUpdateShareholdersNum.Location = new System.Drawing.Point(1012, 115);
 			this.btnUpdateShareholdersNum.Name = "btnUpdateShareholdersNum";
 			this.btnUpdateShareholdersNum.Size = new System.Drawing.Size(150, 44);
 			this.btnUpdateShareholdersNum.TabIndex = 18;
@@ -492,8 +495,8 @@ namespace Pandora.Invest
 			// 
 			// lblTradeList
 			// 
-			this.lblTradeList.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.lblTradeList.Location = new System.Drawing.Point(408, 412);
+			this.lblTradeList.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.lblTradeList.Location = new System.Drawing.Point(786, 180);
 			this.lblTradeList.Margin = new System.Windows.Forms.Padding(0);
 			this.lblTradeList.Name = "lblTradeList";
 			this.lblTradeList.Size = new System.Drawing.Size(245, 36);
@@ -503,7 +506,7 @@ namespace Pandora.Invest
 			// 
 			// btnImpTradeList
 			// 
-			this.btnImpTradeList.Location = new System.Drawing.Point(807, 449);
+			this.btnImpTradeList.Location = new System.Drawing.Point(1185, 217);
 			this.btnImpTradeList.Margin = new System.Windows.Forms.Padding(0);
 			this.btnImpTradeList.Name = "btnImpTradeList";
 			this.btnImpTradeList.Size = new System.Drawing.Size(80, 45);
@@ -516,7 +519,7 @@ namespace Pandora.Invest
 			// 
 			this.btnSelTradeListDir.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.btnSelTradeListDir.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.btnSelTradeListDir.Location = new System.Drawing.Point(758, 449);
+			this.btnSelTradeListDir.Location = new System.Drawing.Point(1136, 217);
 			this.btnSelTradeListDir.Margin = new System.Windows.Forms.Padding(0);
 			this.btnSelTradeListDir.Name = "btnSelTradeListDir";
 			this.btnSelTradeListDir.Size = new System.Drawing.Size(45, 39);
@@ -539,7 +542,7 @@ namespace Pandora.Invest
 			// 
 			// lblKLineDir
 			// 
-			this.lblKLineDir.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.lblKLineDir.Font = new System.Drawing.Font("宋体", 9.047121F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.lblKLineDir.Location = new System.Drawing.Point(2, 45);
 			this.lblKLineDir.Name = "lblKLineDir";
 			this.lblKLineDir.Size = new System.Drawing.Size(109, 39);
@@ -553,7 +556,7 @@ namespace Pandora.Invest
 			this.tabRuleConf.Location = new System.Drawing.Point(4, 35);
 			this.tabRuleConf.Margin = new System.Windows.Forms.Padding(0);
 			this.tabRuleConf.Name = "tabRuleConf";
-			this.tabRuleConf.Size = new System.Drawing.Size(1395, 979);
+			this.tabRuleConf.Size = new System.Drawing.Size(1311, 393);
 			this.tabRuleConf.TabIndex = 1;
 			this.tabRuleConf.Text = "筛选规则设置";
 			// 
@@ -564,7 +567,7 @@ namespace Pandora.Invest
 			// MainForm
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-			this.ClientSize = new System.Drawing.Size(1575, 928);
+			this.ClientSize = new System.Drawing.Size(1320, 442);
 			this.Controls.Add(this.tabMainWindow);
 			this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
